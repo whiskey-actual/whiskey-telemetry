@@ -7,7 +7,6 @@ export class Azure {
 
   constructor(logStack:string[]) {
     this._logStack=logStack;
-    this._logStack.push('Azure')
   }
 
   _logStack:string[]=[]
@@ -15,7 +14,8 @@ export class Azure {
   public async queryDevices(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<Device[]> {
 
     let output:Array<Device> = []
-    this._logStack.push('queryAzureDevices')
+    this._logStack.push('Azure')
+    this._logStack.push('queryDevices')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
 
@@ -65,13 +65,15 @@ export class Azure {
     }
 
     this._logStack.pop()
+    this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
   }
 
   public async queryManagedDevices(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<Device[]> {
 
     let output:Array<Device> = []
-    this._logStack.push('queryAzureManagedDevices')
+    this._logStack.push('Azure')
+    this._logStack.push('queryManagedDevices')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
 
@@ -145,6 +147,7 @@ export class Azure {
       output.push(d)
     }
 
+    this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
 
@@ -223,7 +226,6 @@ export class Azure {
     }
 
     this._logStack.pop()
-
     return new Promise<any>((resolve) => {resolve(output)})
 
   }

@@ -9,7 +9,6 @@ export class ActiveDirectory
 
   constructor(logStack:string[]) {
     this._logStack=logStack;
-    this._logStack.push('ActiveDirectory')
   }
 
   _logStack:string[]=[]
@@ -17,7 +16,8 @@ export class ActiveDirectory
   public async query(ldapURL:string, bindDN:string, pw:string, searchDN:string, filePathToCACert:string, isPaged:boolean=true, sizeLimit:number=500):Promise<Device[]> {
 
     let output:Array<Device> = []
-    this._logStack.push('queryActiveDirectory')
+    this._logStack.push('ActiveDirectory')
+    this._logStack.push('query')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing..')
 
 
@@ -72,6 +72,7 @@ export class ActiveDirectory
     }
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `done.`)
+    this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
 

@@ -8,7 +8,6 @@ export class Crowdstrike
 
   constructor(logStack:string[]) {
     this._logStack=logStack;
-    this._logStack.push('Crowdstrike')
   }
 
   _logStack:string[]=[]
@@ -16,7 +15,8 @@ export class Crowdstrike
   public async query(baseURL:string, clientId:string, clientSecret:string):Promise<Device[]> {
 
     let output:Array<Device> = []
-    this._logStack.push('queryCrowdstrike')
+    this._logStack.push('Crowdstrike')
+    this._logStack.push('query')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'init ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
@@ -32,6 +32,7 @@ export class Crowdstrike
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${output.length} devices received.`)
 
+    this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
   }
