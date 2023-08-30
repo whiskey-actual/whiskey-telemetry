@@ -32,8 +32,11 @@ export class Azure {
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token.')
     let output:Array<Device> = []
 
-    output.concat(await this.devices(accessToken))
-    output.concat(await this.managedDevices(accessToken))
+    const devices = await this.devices(accessToken);
+    output = output.concat(devices)
+
+    const managedDevices = await this.managedDevices(accessToken);
+    output = output.concat(managedDevices)
 
     this._logStack.pop()
     this._logStack.pop()

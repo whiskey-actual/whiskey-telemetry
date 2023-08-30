@@ -1,3 +1,4 @@
+import https from 'https'
 import axios from 'axios'
 import { WhiskeyUtilities } from 'whiskey-utilities'
 import { Device } from '../Device'
@@ -28,6 +29,9 @@ export class Connectwise
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'init ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
+
+    const httpsAgent = new https.Agent({ rejectUnauthorized: false})
+    axios.defaults.httpsAgent=httpsAgent;
     const instance = axios.create({baseURL: this._baseURL, headers: {clientId: this._clientId}, httpsAgent: {rejectUnauthorized: false}});
     const response = await instance.post('/apitoken', { UserName: this._userName, Password: this._password});
     const accessToken = response.data.AccessToken;
