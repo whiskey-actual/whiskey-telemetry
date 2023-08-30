@@ -1,5 +1,6 @@
 export * from './collectors/ActiveDirectory'
 export * from './collectors/Azure'
+export * from './collectors/Connectwise'
 export * from './collectors/Crowdstrike'
 export * from './Database'
 export * from './Device'

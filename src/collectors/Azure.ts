@@ -5,25 +5,46 @@ import { Device } from '../Device'
 
 export class Azure {
 
-  constructor(logStack:string[]) {
+  constructor(logStack:string[], TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string) {
     this._logStack=logStack;
+    this._TENANT_ID=TENANT_ID
+    this._AAD_ENDPOINT=AAD_ENDPOINT
+    this._GRAPH_ENDPOINT=GRAPH_ENDPOINT
+    this._CLIENT_ID=CLIENT_ID
+    this._CLIENT_SECRET=CLIENT_SECRET
   }
 
   _logStack:string[]=[]
+  _TENANT_ID:string=''
+  _AAD_ENDPOINT:string=''
+  _GRAPH_ENDPOINT:string=''
+  _CLIENT_ID:string=''
+  _CLIENT_SECRET:string=''
 
-  public async queryDevices(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<Device[]> {
-
-    let output:Array<Device> = []
-    this._logStack.push('Azure')
-    this._logStack.push('queryDevices')
+  public async query():Promise<Device[]> {
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
+    const authResponse = await this.getToken();
+    const accessToken = authResponse.accessToken;
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token.')
+    let output:Array<Device> = []
+    this._logStack.push('Azure')
+    this._logStack.push('query')
 
-    const authResponse = await this.getToken(CLIENT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_SECRET);
+    output.concat(await this.devices(accessToken))
+    output.concat(await this.managedDevices(accessToken))
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token, querying devices .. ')
+    this._logStack.pop()
+    this._logStack.pop()
+    return new Promise<Device[]>((resolve) => {resolve(output)})
+  }
 
-    const deviceList = await this.getData(authResponse.accessToken, `${GRAPH_ENDPOINT}/v1.0/devices`)
+  public async devices(accessToken:string):Promise<Device[]> {
+
+    let output:Array<Device> = []
+    this._logStack.push('devices')
+
+    const deviceList = await this.getData(accessToken, `${this._GRAPH_ENDPOINT}/v1.0/devices`)
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
 
@@ -65,23 +86,15 @@ export class Azure {
     }
 
     this._logStack.pop()
-    this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
   }
 
-  public async queryManagedDevices(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<Device[]> {
+  public async managedDevices(accessToken:string):Promise<Device[]> {
 
     let output:Array<Device> = []
-    this._logStack.push('Azure')
-    this._logStack.push('queryManagedDevices')
+    this._logStack.push('managedDevices')
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
-
-    const authResponse = await this.getToken(CLIENT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_SECRET);
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token, querying devices .. ')
-
-    const deviceList = await this.getData(authResponse.accessToken, `${GRAPH_ENDPOINT}/v1.0/deviceManagement/managedDevices`)
+    const deviceList = await this.getData(accessToken, `${this._GRAPH_ENDPOINT}/v1.0/deviceManagement/managedDevices`)
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
 
@@ -153,17 +166,17 @@ export class Azure {
 
   }
 
-  private async getToken(CLIENT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, TENANT_ID:string, CLIENT_SECRET:string):Promise<msal.AuthenticationResult> {
+  private async getToken():Promise<msal.AuthenticationResult> {
 
     const msalConfig:msal.Configuration = {
       auth: {
-        clientId: CLIENT_ID,
-        authority: `${AAD_ENDPOINT}/${TENANT_ID}`,
-        clientSecret: CLIENT_SECRET
+        clientId: this._CLIENT_ID,
+        authority: `${this._AAD_ENDPOINT}/${this._TENANT_ID}`,
+        clientSecret: this._CLIENT_SECRET
       }
     }
 
-    const tokenRequest:msal.ClientCredentialRequest = { scopes: [`${GRAPH_ENDPOINT}/.default`]}
+    const tokenRequest:msal.ClientCredentialRequest = { scopes: [`${this._GRAPH_ENDPOINT}/.default`]}
 
     const cca:msal.ConfidentialClientApplication = new msal.ConfidentialClientApplication(msalConfig);
 
