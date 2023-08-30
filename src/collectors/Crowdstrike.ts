@@ -24,8 +24,8 @@ export class Crowdstrike
     this._logStack.push('Crowdstrike')
     this._logStack.push('query')
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'init ..')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
 
     const instance = axios.create({baseURL: this._baseURL});
     const response = await instance.post(`/oauth2/token?client_id=${this._clientId}&client_secret=${this._clientSecret}`)
@@ -38,6 +38,7 @@ export class Crowdstrike
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${output.length} devices received.`)
 
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})

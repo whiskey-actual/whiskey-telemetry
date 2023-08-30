@@ -26,10 +26,11 @@ export class Azure {
     this._logStack.push('Azure')
     this._logStack.push('query')
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
     const authResponse = await this.getToken();
     const accessToken = authResponse.accessToken;
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token.')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
     let output:Array<Device> = []
 
     const devices = await this.devices(accessToken);
@@ -38,6 +39,7 @@ export class Azure {
     const managedDevices = await this.managedDevices(accessToken);
     output = output.concat(managedDevices)
 
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})

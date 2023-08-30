@@ -27,12 +27,12 @@ export class Connectwise
     this._logStack.push('Connectwise')
     this._logStack.push('query')
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'init ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
 
     const httpsAgent = new https.Agent({ rejectUnauthorized: false})
     axios.defaults.httpsAgent=httpsAgent;
-    const instance = axios.create({baseURL: this._baseURL, headers: {clientId: this._clientId}, httpsAgent: {rejectUnauthorized: false}});
+    const instance = axios.create({baseURL: this._baseURL, headers: {clientId: this._clientId}});
     const response = await instance.post('/apitoken', { UserName: this._userName, Password: this._password});
     const accessToken = response.data.AccessToken;
     instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
@@ -46,6 +46,7 @@ export class Connectwise
       output.push(d)
     }
 
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
