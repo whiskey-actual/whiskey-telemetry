@@ -6,7 +6,7 @@
     "mongoose": "^7.5.0",
     "whiskey-utilities": "^1.0.27"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "name": "whiskey-telemetry",
   "description": "",
   "main": "./lib/index.js",
