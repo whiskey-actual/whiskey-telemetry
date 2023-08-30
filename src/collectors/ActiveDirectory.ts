@@ -33,7 +33,7 @@ export class ActiveDirectory
     let output:Array<Device> = []
     this._logStack.push('ActiveDirectory')
     this._logStack.push('query')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
 
 
     const client = new Client(
@@ -86,7 +86,7 @@ export class ActiveDirectory
       await client.unbind();
     }
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `done.`)
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})

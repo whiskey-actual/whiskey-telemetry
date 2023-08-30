@@ -28,7 +28,7 @@ export class Connectwise
     this._logStack.push('query')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
 
     const httpsAgent = new https.Agent({ rejectUnauthorized: false})
     axios.defaults.httpsAgent=httpsAgent;
