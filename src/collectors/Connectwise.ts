@@ -36,11 +36,21 @@ export class Connectwise
     const response = await instance.post('/apitoken', { UserName: this._userName, Password: this._password});
     const accessToken = response.data.AccessToken;
     instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received accessToken; querying devices ..`)
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received accessToken ..`)
 
-    const queryResponse = await instance.get('/Computers?pagesize=10000&orderby=ComputerName asc')
-    const computers = queryResponse.data
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying computers ..`)
+    const queryComputers = await instance.get('/Computers?pagesize=10000&orderby=ComputerName asc')
+    const computers = queryComputers.data
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${computers.length} devices received.`)
+    for(let i=0; i<computers.length; i++) {
+      let d:Device = {deviceName: computers[i].ComputerName.toString()}
+      output.push(d)
+    }
+
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying network devices ..`)
+    const queryNetworkDevices = await instance.get('/NetworkDevices?pagesize=10000&orderby=ComputerName asc')
+    const networkDevices = queryNetworkDevices.data
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${networkDevices.length} devices received.`)
     for(let i=0; i<computers.length; i++) {
       let d:Device = {deviceName: computers[i].ComputerName.toString()}
       output.push(d)

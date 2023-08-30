@@ -169,7 +169,6 @@ export class Azure {
     }
 
     this._logStack.pop()
-    this._logStack.pop()
     return new Promise<Device[]>((resolve) => {resolve(output)})
 
   }
