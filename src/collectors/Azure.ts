@@ -44,6 +44,7 @@ export class Azure {
 
     let output:Array<Device> = []
     this._logStack.push('devices')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching devices ..`)
 
     const deviceList = await this.getData(accessToken, `${this._GRAPH_ENDPOINT}/v1.0/devices`)
 
@@ -94,6 +95,7 @@ export class Azure {
 
     let output:Array<Device> = []
     this._logStack.push('managedDevices')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching managed devices ..`)
 
     const deviceList = await this.getData(accessToken, `${this._GRAPH_ENDPOINT}/v1.0/deviceManagement/managedDevices`)
 
