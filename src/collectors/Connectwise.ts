@@ -48,7 +48,7 @@ export class Connectwise
     }
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying network devices ..`)
-    const queryNetworkDevices = await instance.get('/NetworkDevices?pagesize=10000&orderby=ComputerName asc')
+    const queryNetworkDevices = await instance.get('/NetworkDevices?pagesize=10000&orderby=Name asc')
     const networkDevices = queryNetworkDevices.data
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${networkDevices.length} devices received.`)
     for(let i=0; i<computers.length; i++) {
