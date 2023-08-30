@@ -26,7 +26,6 @@ export const DeviceSchema = new Schema<Device>({
 
 
   // azure
-  observedByAzure: {type:Boolean, default:false, required:true, index:true},
   azureDisplayName: { type:String, default:'UNKNOWN' },
   azureId: {type:String, default:'UNKNOWN'},
   azureDeviceCategory: {type:String, default:'UNKNOWN'},
@@ -56,10 +55,11 @@ export const DeviceSchema = new Schema<Device>({
   azureOnPremisesLastSyncDateTime: {type:Date, default:minDate},
   azureRegistrationDateTime: {type:Date, default:minDate},
   // azure - booleans
-  azureAccountEnabled: {type:Boolean, default:minDate},
-  azureIsCompliant: {type:Boolean, default:minDate},
-  azureIsManaged: {type:Boolean, default:minDate},
-  azureIsRooted: {type:Boolean, default:minDate},
+  observedByAzure: {type:Boolean, default:false, required:true, index:true},
+  azureAccountEnabled: {type:Boolean, default:false},
+  azureIsCompliant: {type:Boolean, default:false},
+  azureIsManaged: {type:Boolean, default:false},
+  azureIsRooted: {type:Boolean, default:false},
 
   // azure managed
   azureManagedDeviceName: {type:String, default:'UNKNOWN'},
@@ -113,11 +113,12 @@ export const DeviceSchema = new Schema<Device>({
   azureManagedComplianceGracePeriodExpirationDateTime: {type:Date, default:minDate},
   azureManagedManagementCertificateExpirationDateTime: {type:Date, default:minDate},
   // azure managed - boolean
+  observedByAzureMDM: {type:Boolean, default:false, required:true, index:true},
   azureManagedIsEASActivated: {type:Boolean, default:false},
   azureManagedIsAzureADRegistered: {type:Boolean, default:false},
   azureManagedIsSupervised: {type:Boolean, default:false},
   azureManagedIsEncrypted: {type:Boolean, default:false},
-  observedByAzureMDM: {type:Boolean, default:false, required:true, index:true},
+
 
   // crowdstrike
   crowdstrikeDeviceId: {type:String, default:'UNKNOWN'},
