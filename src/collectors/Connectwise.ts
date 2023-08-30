@@ -44,6 +44,28 @@ export class Connectwise
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${computers.length} devices received.`)
     for(let i=0; i<computers.length; i++) {
       let d:Device = {deviceName: computers[i].ComputerName.toString()}
+      d.connectwiseId = computers[i].Id;
+      d.connectwiseLocation = computers[i].Location.Name;
+      d.connectwiseClient = computers[i].Client.Name;
+      d.connectwiseOperatingSystem = computers[i].OperatingSystemName;
+      d.connectwiseOperatingSystemVersion = computers[i].OperatingSystemVersion;
+      d.connectwiseDomainName = computers[i].DomainName;
+      d.connectwiseLastObserved = computers[i].RemoteAgentLastContact;
+      d.connectwiseAgentVersion = computers[i].RemoteAgentVersion;
+      d.connectwiseComment = computers[i].Comment;
+      d.connectwiseWindowsUpdateDate = computers[i].WindowsUpdateDate;
+      d.connectwiseAntivirusDefinitionDate = computers[i].AntivirusDefinitionDate;
+      d.connectwiseTotalMemory = computers[i].TotalMemory;
+      d.connectwiseFreeMemory = computers[i].FreeMemory;
+      d.connectwiseIpAddress = computers[i].LocalIPAddress;
+      d.connectwiseMacAddress = computers[i].MACAddress;
+      d.connectwiseLastUserName = computers[i].LastUserName;
+      d.connectwiseFirstSeen = computers[i].DateAdded;
+      d.connectwiseType = computers[i].Type;
+      d.connectwiseStatus = computers[i].Status;
+      d.connectwiseSerialNumber = computers[i].SerialNumber;
+      d.connectwiseBiosManufacturer = computers[i].BiosManufacturer;
+      d.observedByConnectwise = true;
       output.push(d)
     }
 
@@ -53,6 +75,17 @@ export class Connectwise
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${networkDevices.length} devices received.`)
     for(let i=0; i<computers.length; i++) {
       let d:Device = {deviceName: computers[i].ComputerName.toString()}
+      d.connectwiseId = computers[i].Id;
+      d.connectwiseLocation = computers[i].Location.Name;
+      d.connectwiseType = computers[i].Type;
+      d.connectwiseMacAddress = computers[i].MACAddress;
+      d.connectwiseFirstSeen = computers[i].DateAdded;
+      d.connectwiseLastObserved = computers[i].RemoteAgentLastContact;
+      d.connectwiseBiosManufacturer = computers[i].BiosManufacturer;
+      d.connectwiseModel = computers[i].ModelName;
+      d.connectwiseDescription = computers[i].Description;
+      d.connectwiseClient = computers[i].Client.Name;
+      d.observedByConnectwise = true;
       output.push(d)
     }
 

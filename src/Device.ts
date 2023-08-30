@@ -120,6 +120,32 @@ export const DeviceSchema = new Schema<Device>({
   azureManagedIsEncrypted: {type:Boolean, default:false},
 
 
+  // connectwise -- user device
+  connectwiseId: {type:String, default:'UNKNOWN'},
+  connectwiseLocation: {type:String, default:'UNKNOWN'},
+  connectwiseClient: {type:String, default:'UNKNOWN'},
+  connectwiseOperatingSystem: {type:String, default:'UNKNOWN'},
+  connectwiseOperatingSystemVersion: {type:String, default:'UNKNOWN'},
+  connectwiseDomainName: {type:String, default:'UNKNOWN'},
+  connectwiseAgentVersion: {type:String, default:'UNKNOWN'},
+  connectwiseComment: {type:String, default:'UNKNOWN'},
+  connectwiseIpAddress: {type:String, default:'UNKNOWN'},
+  connectwiseMacAddress: {type:String, default:'UNKNOWN'},
+  connectwiseLastUserName: {type:String, default:'UNKNOWN'},
+  connectwiseType: {type:String, default:'UNKNOWN'},
+  connectwiseStatus: {type:String, default:'UNKNOWN'},
+  connectwiseSerialNumber: {type:String, default:'UNKNOWN'},
+  connectwiseBiosManufacturer: {type:String, default:'UNKNOWN'},
+  connectwiseModel: {type:String, default:'UNKNOWN'},
+  connectwiseDescription: {type:String, default:'UNKNOWN'},
+  connectwiseTotalMemory: {type:Number, default:0},
+  connectwiseFreeMemory: {type:Number, default:0},
+  connectwiseLastObserved: {type:Date, default:minDate},
+  connectwiseFirstSeen: {type:Date, default:minDate},
+  connectwiseWindowsUpdateDate: {type:Date, default:minDate},
+  connectwiseAntivirusDefinitionDate: {type:Date, default:minDate},
+  observedByConnectwise: {type:Boolean, default:false, required:true, index:true},
+
   // crowdstrike
   crowdstrikeDeviceId: {type:String, default:'UNKNOWN'},
   crowdstrikeCID: {type:String, default:'UNKNOWN'},
@@ -271,6 +297,32 @@ export interface Device {
   azureManagedIsSupervised?:boolean;
   azureManagedIsEncrypted?:boolean;
   observedByAzureMDM?:boolean;
+
+  // connectwise
+  connectwiseId?:string|undefined;
+  connectwiseLocation?:string|undefined;
+  connectwiseClient?:string|undefined;
+  connectwiseOperatingSystem?:string|undefined;
+  connectwiseOperatingSystemVersion?:string|undefined;
+  connectwiseDomainName?:string|undefined;
+  connectwiseAgentVersion?:string|undefined;
+  connectwiseComment?:string|undefined;
+  connectwiseIpAddress?:string|undefined;
+  connectwiseMacAddress?:string|undefined;
+  connectwiseLastUserName?:string|undefined;
+  connectwiseType?:string|undefined;
+  connectwiseStatus?:string|undefined;
+  connectwiseSerialNumber?:string|undefined;
+  connectwiseBiosManufacturer?:string|undefined;
+  connectwiseModel?:string|undefined;
+  connectwiseDescription?:string|undefined;
+  connectwiseTotalMemory?:Number;
+  connectwiseFreeMemory?:Number;
+  connectwiseLastObserved?:Date|undefined;
+  connectwiseFirstSeen?:Date|undefined;
+  connectwiseWindowsUpdateDate?:Date|undefined;
+  connectwiseAntivirusDefinitionDate?:Date|undefined;
+  observedByConnectwise?:boolean;
 
   // crowdstrike
   crowdstrikeDeviceId?:string|undefined;
