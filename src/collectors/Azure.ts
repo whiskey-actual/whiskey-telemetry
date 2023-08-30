@@ -23,13 +23,14 @@ export class Azure {
 
   public async query():Promise<Device[]> {
 
+    this._logStack.push('Azure')
+    this._logStack.push('query')
+
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token.. ')
     const authResponse = await this.getToken();
     const accessToken = authResponse.accessToken;
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token.')
     let output:Array<Device> = []
-    this._logStack.push('Azure')
-    this._logStack.push('query')
 
     output.concat(await this.devices(accessToken))
     output.concat(await this.managedDevices(accessToken))

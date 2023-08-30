@@ -6,13 +6,19 @@ import { Device } from '../Device'
 export class Crowdstrike
 {
 
-  constructor(logStack:string[]) {
+  constructor(logStack:string[], baseURL:string, clientId:string, clientSecret:string) {
     this._logStack=logStack;
+    this._baseURL=baseURL
+    this._clientId=clientId
+    this._clientSecret=clientSecret
   }
 
   _logStack:string[]=[]
+  _baseURL:string=''
+  _clientId:string=''
+  _clientSecret:string=''
 
-  public async query(baseURL:string, clientId:string, clientSecret:string):Promise<Device[]> {
+  public async query():Promise<Device[]> {
 
     let output:Array<Device> = []
     this._logStack.push('Crowdstrike')
@@ -21,8 +27,8 @@ export class Crowdstrike
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'init ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'getting access token ..')
 
-    const instance = axios.create({baseURL: baseURL});
-    const response = await instance.post(`/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}`)
+    const instance = axios.create({baseURL: this._baseURL});
+    const response = await instance.post(`/oauth2/token?client_id=${this._clientId}&client_secret=${this._clientSecret}`)
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. access token received; querying devices ..`)
 

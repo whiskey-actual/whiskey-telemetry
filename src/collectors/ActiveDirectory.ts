@@ -7,13 +7,28 @@ import fs from 'fs'
 export class ActiveDirectory
 {
 
-  constructor(logStack:string[]) {
+  constructor(logStack:string[], ldapURL:string, bindDN:string, pw:string, searchDN:string, filePathToCACert:string, isPaged:boolean=true, sizeLimit:number=500) {
     this._logStack=logStack;
+    this._ldapURL=ldapURL
+    this._bindDN=bindDN
+    this._pw=pw
+    this._searchDN=searchDN
+    this._filePathToCACert=filePathToCACert
+    this._isPaged=isPaged
+    this._sizeLimit=sizeLimit
   }
 
   _logStack:string[]=[]
+  _ldapURL:string=''
+  _bindDN:string=''
+  _pw:string=''
+  _searchDN:string=''
+  _filePathToCACert:string=''
+  _isPaged:boolean=false
+  _sizeLimit:number=500
 
-  public async query(ldapURL:string, bindDN:string, pw:string, searchDN:string, filePathToCACert:string, isPaged:boolean=true, sizeLimit:number=500):Promise<Device[]> {
+
+  public async query():Promise<Device[]> {
 
     let output:Array<Device> = []
     this._logStack.push('ActiveDirectory')
@@ -23,10 +38,10 @@ export class ActiveDirectory
 
     const client = new Client(
       {
-        url: ldapURL,
+        url: this._ldapURL,
         tlsOptions:
           {
-            ca: [ fs.readFileSync(filePathToCACert) ],
+            ca: [ fs.readFileSync(this._filePathToCACert) ],
             rejectUnauthorized: false
           }
       }
@@ -36,14 +51,14 @@ export class ActiveDirectory
 
       WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. binding LDAP ..')
 
-      await client.bind(bindDN, pw);
+      await client.bind(this._bindDN, this._pw);
 
       WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. authenticated successfully, querying devices..  ')
 
-      const { searchEntries, searchReferences } = await client.search(searchDN,  {
+      const { searchEntries, searchReferences } = await client.search(this._searchDN,  {
         filter: '&(objectClass=computer)',
-        paged: isPaged,
-        sizeLimit: sizeLimit
+        paged: this._isPaged,
+        sizeLimit: this._sizeLimit
       },);
 
       WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${searchEntries.length} devices, creating objects .. `)
