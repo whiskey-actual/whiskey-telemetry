@@ -16,11 +16,11 @@ export interface ActiveDirectoryDevice {
   // numbers
   activeDirectoryLogonCount: Number,
   // dates
-  activeDirectoryWhenCreated: Date,
-  activeDirectoryWhenChanged: Date,
-  activeDirectoryLastLogon: Date,
-  activeDirectoryPwdLastSet: Date,
-  activeDirectoryLastLogonTimestamp: Date
+  activeDirectoryWhenCreated: Date|undefined,
+  activeDirectoryWhenChanged: Date|undefined,
+  activeDirectoryLastLogon: Date|undefined,
+  activeDirectoryPwdLastSet: Date|undefined,
+  activeDirectoryLastLogonTimestamp: Date|undefined
 }
 
 export interface AzureDevice {

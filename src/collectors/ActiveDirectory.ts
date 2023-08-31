@@ -33,7 +33,7 @@ export class ActiveDirectory
     let output:Array<ActiveDirectoryDevice> = []
     this._logStack.push('ActiveDirectory')
     this._logStack.push('query')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, 'initializing ..')
 
 
     const client = new Client(
@@ -49,11 +49,12 @@ export class ActiveDirectory
 
     try {
 
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. binding LDAP ..')
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, '.. binding LDAP ..')
 
       await client.bind(this._bindDN, this._pw);
 
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. authenticated successfully, querying devices..  ')
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. authenticated successfully ..')
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, '.. querying devices ..')
 
       const { searchEntries, searchReferences } = await client.search(this._searchDN,  {
         filter: '&(objectClass=computer)',
@@ -61,22 +62,23 @@ export class ActiveDirectory
         sizeLimit: this._sizeLimit
       },);
 
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${searchEntries.length} devices, creating objects .. `)
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${searchEntries.length} devices .. `)
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. creating objects ..`)
 
       for(let i=0; i<searchEntries.length; i++) {
         const device:ActiveDirectoryDevice = {
           deviceName: searchEntries[i].cn.toString(),
           observedByActiveDirectory: true,
           activeDirectoryDN: searchEntries[i].dn.toString(),
-          activeDirectoryWhenCreated: this.ldapTimestampToJS(searchEntries[i].whenCreated.toString()),
-          activeDirectoryWhenChanged: this.ldapTimestampToJS(searchEntries[i].whenChanged.toString()),
-          activeDirectoryLastLogon: this.ldapTimestampToJS(searchEntries[i].lastLogon.toString()),
-          activeDirectoryPwdLastSet: this.ldapTimestampToJS(searchEntries[i].pwdLastSet.toString()),
           activeDirectoryLogonCount: Number(searchEntries[i].logonCount),
           activeDirectoryOperatingSystem: searchEntries[i].operatingSystem? searchEntries[i].operatingSystem.toString() : undefined,
           activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined,
           activeDirectoryDNSHostName: searchEntries[i].dNSHostName ? searchEntries[i].dNSHostName.toString(): undefined,
-          activeDirectoryLastLogonTimestamp: this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString())
+          activeDirectoryWhenCreated: this.ldapTimestampToJS(searchEntries[i].whenCreated.toString()),
+          activeDirectoryWhenChanged: searchEntries[i].whenChanged ? this.ldapTimestampToJS(searchEntries[i].whenChanged.toString()) : undefined,
+          activeDirectoryLastLogon: searchEntries[i].lastLogon ? this.ldapTimestampToJS(searchEntries[i].lastLogon.toString()) : undefined,
+          activeDirectoryPwdLastSet: searchEntries[i].pwdLastSet ? this.ldapTimestampToJS(searchEntries[i].pwdLastSet.toString()) : undefined,
+          activeDirectoryLastLogonTimestamp: searchEntries[i].lastLogonTimestamp ? this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString()) : undefined
         }
 
         output.push(device)
