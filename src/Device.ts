@@ -24,8 +24,10 @@ export interface ActiveDirectoryDevice {
 }
 
 export interface AzureDevice {
-  // strings
+  // mandatory
   deviceName: string,
+  observedByAzure: boolean;
+  //strings
   azureDisplayName: string,
   azureId: string;
   azureDeviceCategory: string;
@@ -55,7 +57,7 @@ export interface AzureDevice {
   azureOnPremisesLastSyncDateTime: Date;
   azureRegistrationDateTime: Date;
   // booleans
-  observedByAzure: boolean;
+
   azureAccountEnabled: boolean;
   azureIsCompliant: boolean;
   azureIsManaged: boolean;
@@ -64,8 +66,11 @@ export interface AzureDevice {
 
 export interface AzureManagedDevice {
 
-  // strings
+  // mandatory
   deviceName: string,
+  observedByAzureMDM: boolean;
+
+  // strings
   azureManagedDeviceName: string;
   azureManagedManagedDeviceName: string;
   azureManagedId: string;
@@ -117,7 +122,6 @@ export interface AzureManagedDevice {
   azureManagedComplianceGracePeriodExpirationDateTime: Date;
   azureManagedManagementCertificateExpirationDateTime: Date;
   // azure managed - boolean
-  observedByAzureMDM: boolean;
   azureManagedIsEASActivated: boolean;
   azureManagedIsAzureADRegistered: boolean;
   azureManagedIsSupervised: boolean;

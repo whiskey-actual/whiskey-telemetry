@@ -4,16 +4,18 @@ import * as devices from './Device'
 
 export class Persist {
 
-  constructor(logStack:string[], mongoConnection:Mongoose, showDetails:boolean=false) {
+  constructor(logStack:string[], mongoConnection:Mongoose, showDetails:boolean=false, debugOutput:boolean=false) {
     this._logStack = logStack;
     this._mongoConnection = mongoConnection
     this._showDetails=showDetails
+    this._debugOutput=debugOutput
   }
 
   _minDate:Date = new Date(-8640000000000000);
   _logStack:string[]=[]
   _mongoConnection:Mongoose=new Mongoose()
   _showDetails:Boolean = false
+  _debugOutput = false
 
   public async persistDevices(deviceObjects:any, logFrequency:number=1000):Promise<Number> {
 
@@ -190,7 +192,7 @@ export class Persist {
   private pruneObject(obj:any, keys:string[], valueToKeep:any):any {
     for(let i=0; i<keys.length; i++) {
       if(Object.keys(obj).includes(keys[i]) && obj[keys[i]]!=valueToKeep) {
-        //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, obj.deviceName, `pruning key: ${obj[keys[i]]}`)
+        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, obj.deviceName, `pruning key: ${[keys[i]]} (${obj[keys[i]]})`) }
         delete obj[keys[i]]
       }
     }
