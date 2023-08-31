@@ -12,7 +12,7 @@ export interface ActiveDirectoryDevice {
   activeDirectoryDN: string,
   activeDirectoryOperatingSystem?: string|undefined,
   activeDirectoryOperatingSystemVersion: string|undefined,
-  activeDirectoryDNSHostName: string,
+  activeDirectoryDNSHostName: string|undefined,
   // numbers
   activeDirectoryLogonCount: Number,
   // dates
@@ -218,7 +218,7 @@ export const DeviceSchema = new Schema({
 
 
   // azure
-  azureDisplayName: { type:String },
+  azureDisplayName: {type:String},
   azureId: {type:String},
   azureDeviceCategory: {type:String},
   azureDeviceId: {type:String},
