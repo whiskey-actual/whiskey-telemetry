@@ -192,11 +192,11 @@ export class Persist {
   private pruneObject(obj:any, keys:string[], valueToKeep:any):any {
     for(let i=0; i<keys.length; i++) {
       if(Object.keys(obj).includes(keys[i]) && (obj[keys[i]]!=valueToKeep || obj[keys[i]]==undefined)) {
-        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, obj.deviceName, `pruning key: ${[keys[i]]} (${obj[keys[i]]})`) }
+        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, this._logStack, `${obj.deviceName} :: pruning key: ${[keys[i]]} (${obj[keys[i]]})`) }
         delete obj[keys[i]]
       }
       else {
-        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, obj.deviceName, `keeping key: ${[keys[i]]} (${obj[keys[i]]})`) }
+        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, this._logStack, `${obj.deviceName} :: keeping key: ${[keys[i]]} (${obj[keys[i]]})`) }
       }
     }
     return obj
