@@ -74,7 +74,7 @@ export class ActiveDirectory
           activeDirectoryPwdLastSet: this.ldapTimestampToJS(searchEntries[i].pwdLastSet.toString()),
           activeDirectoryLogonCount: Number(searchEntries[i].logonCount),
           activeDirectoryOperatingSystem: searchEntries[i].operatingSystem? searchEntries[i].operatingSystem.toString() : undefined,
-          activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion.toString(),
+          activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined,
           activeDirectoryDNSHostName: searchEntries[i].dNSHostName.toString(),
           activeDirectoryLastLogonTimestamp: this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString())
         }
