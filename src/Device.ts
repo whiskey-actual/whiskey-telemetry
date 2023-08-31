@@ -5,11 +5,13 @@ export interface Device {
 }
 
 export interface ActiveDirectoryDevice {
-  // strings
+  // mandatory
   deviceName: string,
+  observedByActiveDirectory: boolean,
+  // strings
   activeDirectoryDN: string,
-  activeDirectoryOperatingSystem: string,
-  activeDirectoryOperatingSystemVersion: string,
+  activeDirectoryOperatingSystem?: string|undefined,
+  activeDirectoryOperatingSystemVersion: string|undefined,
   activeDirectoryDNSHostName: string,
   // numbers
   activeDirectoryLogonCount: Number,
@@ -18,9 +20,7 @@ export interface ActiveDirectoryDevice {
   activeDirectoryWhenChanged: Date,
   activeDirectoryLastLogon: Date,
   activeDirectoryPwdLastSet: Date,
-  activeDirectoryLastLogonTimestamp: Date,
-  // booleans
-  observedByActiveDirectory: boolean
+  activeDirectoryLastLogonTimestamp: Date
 }
 
 export interface AzureDevice {
