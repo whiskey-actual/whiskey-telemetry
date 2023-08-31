@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { WhiskeyUtilities } from 'whiskey-utilities'
-import { Device } from '../Device'
+import { CrowdstrikeDevice } from '../Device'
 
 
 export class Crowdstrike
@@ -18,9 +18,9 @@ export class Crowdstrike
   _clientId:string=''
   _clientSecret:string=''
 
-  public async query():Promise<Device[]> {
+  public async query():Promise<CrowdstrikeDevice[]> {
 
-    let output:Array<Device> = []
+    let output:Array<CrowdstrikeDevice> = []
     this._logStack.push('Crowdstrike')
     this._logStack.push('query')
 
@@ -41,10 +41,10 @@ export class Crowdstrike
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
-    return new Promise<Device[]>((resolve) => {resolve(output)})
+    return new Promise<CrowdstrikeDevice[]>((resolve) => {resolve(output)})
   }
 
-  private async getDevices(instance:AxiosInstance):Promise<Device[]> {
+  private async getDevices(instance:AxiosInstance):Promise<CrowdstrikeDevice[]> {
 
     this._logStack.push('getDevices')
 
@@ -54,7 +54,7 @@ export class Crowdstrike
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${foundDevices.length} devices; fetching details ..`)
 
-    let devices:Array<Device> = [];
+    let devices:Array<CrowdstrikeDevice> = [];
 
     const startDate = new Date()
 
@@ -64,36 +64,39 @@ export class Crowdstrike
 
         try {
           const deviceDetails = response.data.resources[0];
-          const device:Device = {deviceName: deviceDetails.hostname.toString()}
-          device.crowdstrikeDeviceId = deviceDetails.device_id ? deviceDetails.device_id.toString() : undefined
-          device.crowdstrikeCID = deviceDetails.cid ? deviceDetails.cid.toString() : undefined
-          device.crowdstrikeAgentVersion = deviceDetails.agent_version ? deviceDetails.agent_version.toString() : undefined
-          device.crowdstrikeBIOSManufacturer = deviceDetails.bios_manufacturer ? deviceDetails.bios_manufacturer.toString() : undefined
-          device.crowdstrikeBIOSVersion = deviceDetails.bios_version ? deviceDetails.bios_version.toString() : undefined
-          device.crowdstrikeExternalIP = deviceDetails.external_ip ? deviceDetails.external_ip.toString() : undefined
-          device.crowdstrikeMACAddress = deviceDetails.mac_address ? deviceDetails.mac_address.toString() : undefined
-          device.crowdstrikeLocalIP = deviceDetails.local_ip ? deviceDetails.local_ip.toString() : undefined
-          device.crowdstrikeMachineDomain = deviceDetails.machine_domain ? deviceDetails.machine_domain.toString() : undefined
-          device.crowdstrikeMajorVersion = deviceDetails.major_version ? deviceDetails.major_version.toString() : undefined
-          device.crowdstrikeMinorVersion = deviceDetails.minor_version ? deviceDetails.minor_version.toString() : undefined
-          device.crowdstrikeOSBuild = deviceDetails.os_build ? deviceDetails.os_build .toString(): undefined
-          device.crowdstrikeOSVersion = deviceDetails.os_version ? deviceDetails.os_version.toString() : undefined
-          device.crowdstrikePlatformName = deviceDetails.platform_name ? deviceDetails.platform_name.toString() : undefined
-          device.crowdstrikeReducedFunctionalityMode = deviceDetails.reduced_functionality_mode ? deviceDetails.reduced_functionality_mode.toString() : undefined
-          device.crowdstrikeProductTypeDesc = deviceDetails.product_type_desc ? deviceDetails.product_type_desc.toString() : undefined
-          device.crowdstrikeProvisionStatus = deviceDetails.provision_status ? deviceDetails.provision_status.toString() : undefined
-          device.crowdstrikeSerialNumber = deviceDetails.serial_number ? deviceDetails.serial_number.toString() : undefined
-          device.crowdstrikeServicePackMajor = deviceDetails.service_pack_major ? deviceDetails.service_pack_major.toString() : undefined
-          device.crowdstrikeServicePackMinor = deviceDetails.service_pack_minor ? deviceDetails.service_pack_minor.toString() : undefined
-          device.crowdstrikeStatus = deviceDetails.status ? deviceDetails.status.toString() : undefined
-          device.crowdstrikeSystemManufacturer = deviceDetails.system_manufacturer ? deviceDetails.system_manufacturer.toString() : undefined
-          device.crowdstrikeSystemProductName = deviceDetails.system_product_name ? deviceDetails.system_product_name.toString() : undefined
-          device.crowdstrikeFirstSeenDateTime = new Date(deviceDetails.first_seen)
-          device.crowdstrikeLastSeenDateTime = new Date(deviceDetails.last_seen)
-          device.crowdstrikeModifiedDateTime = new Date(deviceDetails.modified_timestamp)
-          device.crowdstrikeKernelVersion = deviceDetails.kernel_version ? deviceDetails.kernel_version.toString() : undefined
-          device.observedByCrowdstrike = true
-          devices.push(device)
+          const d:CrowdstrikeDevice = {
+            deviceName: deviceDetails.hostname.toString(),
+            observedByCrowdstrike: true,
+            crowdstrikeDeviceId: deviceDetails.device_id,
+            crowdstrikeCID: deviceDetails.cid,
+            crowdstrikeAgentVersion: deviceDetails.agent_version,
+            crowdstrikeBIOSManufacturer: deviceDetails.bios_manufacturer,
+            crowdstrikeBIOSVersion: deviceDetails.bios_version,
+            crowdstrikeExternalIP: deviceDetails.external_ip,
+            crowdstrikeMACAddress: deviceDetails.mac_address,
+            crowdstrikeLocalIP: deviceDetails.local_ip,
+            crowdstrikeMachineDomain: deviceDetails.machine_domain,
+            crowdstrikeMajorVersion: deviceDetails.major_version,
+            crowdstrikeMinorVersion: deviceDetails.minor_version,
+            crowdstrikeOSBuild: deviceDetails.os_build,
+            crowdstrikeOSVersion: deviceDetails.os_version,
+            crowdstrikePlatformName: deviceDetails.platform_name,
+            crowdstrikeReducedFunctionalityMode: deviceDetails.reduced_functionality_mode,
+            crowdstrikeProductTypeDesc: deviceDetails.product_type_desc,
+            crowdstrikeProvisionStatus: deviceDetails.provision_status,
+            crowdstrikeSerialNumber: deviceDetails.serial_number,
+            crowdstrikeServicePackMajor: deviceDetails.service_pack_major,
+            crowdstrikeServicePackMinor: deviceDetails.service_pack_minor,
+            crowdstrikeStatus: deviceDetails.status,
+            crowdstrikeSystemManufacturer: deviceDetails.system_manufacturer,
+            crowdstrikeSystemProductName: deviceDetails.system_product_name,
+            crowdstrikeFirstSeenDateTime: new Date(deviceDetails.first_seen),
+            crowdstrikeLastSeenDateTime: new Date(deviceDetails.last_seen),
+            crowdstrikeModifiedDateTime: new Date(deviceDetails.modified_timestamp),
+            crowdstrikeKernelVersion: deviceDetails.kernel_version,
+          }
+
+          devices.push(d)
         } catch(err:any) {
           WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err.toString()}`)
         }
@@ -106,7 +109,7 @@ export class Crowdstrike
     }
 
     this._logStack.pop()
-    return new Promise<Device[]>((resolve) => {resolve(devices)})
+    return new Promise<CrowdstrikeDevice[]>((resolve) => {resolve(devices)})
 
   }
 }

@@ -1,59 +1,251 @@
 import { model, Schema } from "mongoose";
 
-export const minDate:Date = new Date(-8640000000000000);
+export interface Device {
+  deviceName: string;
+}
 
-export const DeviceSchema = new Schema<Device>({
+export interface ActiveDirectoryDevice {
+  // strings
+  deviceName: string,
+  activeDirectoryDN: string,
+  activeDirectoryOperatingSystem: string,
+  activeDirectoryOperatingSystemVersion: string,
+  activeDirectoryDNSHostName: string,
+  // numbers
+  activeDirectoryLogonCount: Number,
+  // dates
+  activeDirectoryWhenCreated: Date,
+  activeDirectoryWhenChanged: Date,
+  activeDirectoryLastLogon: Date,
+  activeDirectoryPwdLastSet: Date,
+  activeDirectoryLastLogonTimestamp: Date,
+  // booleans
+  observedByActiveDirectory: boolean
+}
+
+export interface AzureDevice {
+  // strings
+  deviceName: string,
+  azureDisplayName: string,
+  azureId: string;
+  azureDeviceCategory: string;
+  azureDeviceId: string;
+  azureDeviceMetadata: string;
+  azureDeviceOwnership: string;
+  azureDeviceVersion: string;
+  azureDomainName: string;
+  azureEnrollmentProfileType: string;
+  azureEnrollmentType: string;
+  azureExternalSourceName: string;
+  azureManagementType: string;
+  azureManufacturer: string;
+  azureMDMAppId: string;
+  azureModel: string;
+  azureOnPremisesSyncEnabled: string;
+  azureOperatingSystem: string;
+  azureOperatingSystemVersion: string;
+  azureProfileType: string;
+  azureSourceType: string;
+  azureTrustType: string;
+  // dates
+  azureDeletedDateTime: Date;
+  azureApproximateLastSignInDateTime: Date;
+  azureComplianceExpirationDateTime: Date;
+  azureCreatedDateTime: Date;
+  azureOnPremisesLastSyncDateTime: Date;
+  azureRegistrationDateTime: Date;
+  // booleans
+  observedByAzure: boolean;
+  azureAccountEnabled: boolean;
+  azureIsCompliant: boolean;
+  azureIsManaged: boolean;
+  azureIsRooted: boolean;
+}
+
+export interface AzureManagedDevice {
+
+  // strings
+  deviceName: string,
+  azureManagedDeviceName: string;
+  azureManagedManagedDeviceName: string;
+  azureManagedId: string;
+  azureManagedUserId: string;
+  azureManagedManagedDeviceOwnerType: string;
+  azureManagedOperatingSystem: string;
+  azureManagedComplianceState: string;
+  azureManagedJailBroken: string;
+  azureManagedManagementAgent: string;
+  azureManagedOperatingSystemVersion: string;
+  azureManagedEASDeviceID: string;
+  azureManagedDeviceEnrollmentType: string;
+  azureManagedActivationLockBypassCode: string;
+  azureManagedEmailAddress: string;
+  azureManagedAzureADDeviceID: string;
+  azureManagedDeviceRegistrationState: string;
+  azureManagedDeviceCategoryDisplayName: string;
+  azureManagedExchangeAccessState: string;
+  azureManagedExchangeAccessStateReason: string;
+  azureManagedRemoteAssistanceSessionUrl: string;
+  azureManagedRemoteAssistanceErrorDetails: string;
+  azureManagedUserPrincipalName: string;
+  azureManagedModel: string;
+  azureManagedManufacturer: string;
+  azureManagedIMEI: string;
+  azureManagedSerialNumber: string;
+  azureManagedPhoneNumber: string;
+  azureManagedAndroidSecurityPatchLevel: string;
+  azureManagedUserDisplayName: string;
+  azureManagedConfigurationManagerClientEnabedFeatures: string;
+  azureManagedWiFiMACAddress: string;
+  azureManagedDeviceHealthAttestationState: string;
+  azureManagedSubscriberCarrier: string;
+  azureManagedMEID: string;
+  azureManagedTotalStorageSpaceInBytes: string;
+  azureManagedFreeStorageSpaceInBytes: string;
+  azureManagedPartnerReportedThreatState: string;
+  azureManagedRequireUserEnrollmentApproval: string;
+  azureManagedICCID: string;
+  azureManagedUDID: string;
+  azureManagedNotes: string;
+  azureManagedEthernetMacAddress: string;
+  azureManagedPhysicalMemoryInBytes: string;
+  // dates
+  azureManagedEnrolledDateTime: Date;
+  azureManagedLastSyncDateTime: Date;
+  azureManagedEASActivationDateTime: Date;
+  azureManagedExchangeLastSuccessfulSyncDateTime: Date;
+  azureManagedComplianceGracePeriodExpirationDateTime: Date;
+  azureManagedManagementCertificateExpirationDateTime: Date;
+  // azure managed - boolean
+  observedByAzureMDM: boolean;
+  azureManagedIsEASActivated: boolean;
+  azureManagedIsAzureADRegistered: boolean;
+  azureManagedIsSupervised: boolean;
+  azureManagedIsEncrypted: boolean;
+
+}
+
+export interface ConnectwiseDevice {
+
+  // strings
+  deviceName: string,
+  connectwiseId: string;
+  connectwiseLocation: string;
+  connectwiseClient: string;
+  connectwiseOperatingSystem: string;
+  connectwiseOperatingSystemVersion: string;
+  connectwiseDomainName: string;
+  connectwiseAgentVersion: string;
+  connectwiseComment: string;
+  connectwiseIpAddress: string;
+  connectwiseMacAddress: string;
+  connectwiseLastUserName: string;
+  connectwiseType: string;
+  connectwiseStatus: string;
+  connectwiseSerialNumber: string;
+  connectwiseBiosManufacturer: string;
+  connectwiseModel: string;
+  connectwiseDescription: string;
+  // numbers
+  connectwiseTotalMemory: Number;
+  connectwiseFreeMemory: Number;
+  //dates
+  connectwiseLastObserved: Date;
+  connectwiseFirstSeen: Date;
+  connectwiseWindowsUpdateDate: Date;
+  connectwiseAntivirusDefinitionDate: Date;
+  // booleans
+  observedByConnectwise: Boolean;
+
+}
+
+export interface CrowdstrikeDevice {
+    // strings
+    deviceName: string;
+    crowdstrikeDeviceId: string;
+    crowdstrikeCID: string;
+    crowdstrikeAgentVersion: string;
+    crowdstrikeBIOSManufacturer: string;
+    crowdstrikeBIOSVersion: string;
+    crowdstrikeExternalIP: string;
+    crowdstrikeMACAddress: string;
+    crowdstrikeLocalIP: string;
+    crowdstrikeMachineDomain: string;
+    crowdstrikeMajorVersion: string;
+    crowdstrikeMinorVersion: string;
+    crowdstrikeOSVersion: string;
+    crowdstrikeOSBuild: string;
+    crowdstrikePlatformName: string;
+    crowdstrikeReducedFunctionalityMode: string;
+    crowdstrikeProductTypeDesc: string;
+    crowdstrikeProvisionStatus: string;
+    crowdstrikeSerialNumber: string;
+    crowdstrikeServicePackMajor: string;
+    crowdstrikeServicePackMinor: string;
+    crowdstrikeStatus: string;
+    crowdstrikeSystemManufacturer: string;
+    crowdstrikeSystemProductName: string;
+    crowdstrikeKernelVersion: string;
+    // crowdstrike - datetime
+    crowdstrikeFirstSeenDateTime: Date;
+    crowdstrikeLastSeenDateTime: Date;
+    crowdstrikeModifiedDateTime: Date;
+    // crowdstrike - boolean
+    observedByCrowdstrike: boolean;
+}
+
+export const DeviceSchema = new Schema({
   deviceName: {type:String, required:true, index:true, id: true, unique: true},
   deviceFirstObserved: {type:Date, default:new Date()},
-  deviceLastObserved: {type:Date, default:minDate, required:true },
+  deviceLastObserved: {type:Date, default:new Date(), required:true },
   deviceIsActive: {type:Boolean, default:false, required:true, index:true, },
-  deviceOperatingSystem: {type:String, default:'UNKNOWN', required:true, index:true},
+  deviceOperatingSystem: {type:String, required:true, index:true},
 
   // active directory
-  activeDirectoryDN: {type:String, default:'UNKNOWN'},
+  activeDirectoryDN: {type:String},
   activeDirectoryLogonCount: {type:Number, default:0},
-  activeDirectoryOperatingSystem: {type:String, default:'UNKNOWN'},
-  activeDirectoryOperatingSystemVersion: {type:String, default:'UNKNOWN'},
-  activeDirectoryDNSHostName: {type:String, default:'UNKNOWN'},
+  activeDirectoryOperatingSystem: {type:String},
+  activeDirectoryOperatingSystemVersion: {type:String},
+  activeDirectoryDNSHostName: {type:String},
   // active directory - dates
-  activeDirectoryWhenCreated: {type:Date, default:minDate},
-  activeDirectoryWhenChanged: {type:Date, default:minDate},
-  activeDirectoryLastLogon: {type:Date, default:minDate},
-  activeDirectoryPwdLastSet: {type:Date, default:minDate},
-  activeDirectoryLastLogonTimestamp: {type:Date, default:minDate},
+  activeDirectoryWhenCreated: {type:Date},
+  activeDirectoryWhenChanged: {type:Date},
+  activeDirectoryLastLogon: {type:Date},
+  activeDirectoryPwdLastSet: {type:Date},
+  activeDirectoryLastLogonTimestamp: {type:Date},
   // active directory - booleans
   observedByActiveDirectory: {type:Boolean, default:false, required:true, index:true},
 
 
   // azure
-  azureDisplayName: { type:String, default:'UNKNOWN' },
-  azureId: {type:String, default:'UNKNOWN'},
-  azureDeviceCategory: {type:String, default:'UNKNOWN'},
-  azureDeviceId: {type:String, default:'UNKNOWN'},
-  azureDeviceMetadata: {type:String, default:'UNKNOWN'},
-  azureDeviceOwnership: {type:String, default:'UNKNOWN'},
-  azureDeviceVersion: {type:String, default:'UNKNOWN'},
-  azureDomainName: {type:String, default:'UNKNOWN'},
-  azureEnrollmentProfileType: {type:String, default:'UNKNOWN'},
-  azureEnrollmentType: {type:String, default:'UNKNOWN'},
-  azureExternalSourceName: {type:String, default:'UNKNOWN'},
-  azureManagementType: {type:String, default:'UNKNOWN'},
-  azureManufacturer: {type:String, default:'UNKNOWN'},
-  azureMDMAppId: {type:String, default:'UNKNOWN'},
-  azureModel: {type:String, default:'UNKNOWN'},
-  azureOnPremisesSyncEnabled: {type:String, default:'UNKNOWN'},
-  azureOperatingSystem: {type:String, default:'UNKNOWN'},
-  azureOperatingSystemVersion: {type:String, default:'UNKNOWN'},
-  azureProfileType: {type:String, default:'UNKNOWN'},
-  azureSourceType: {type:String, default:'UNKNOWN'},
-  azureTrustType: {type:String, default:'UNKNOWN'},
+  azureDisplayName: { type:String },
+  azureId: {type:String},
+  azureDeviceCategory: {type:String},
+  azureDeviceId: {type:String},
+  azureDeviceMetadata: {type:String},
+  azureDeviceOwnership: {type:String},
+  azureDeviceVersion: {type:String},
+  azureDomainName: {type:String},
+  azureEnrollmentProfileType: {type:String},
+  azureEnrollmentType: {type:String},
+  azureExternalSourceName: {type:String},
+  azureManagementType: {type:String},
+  azureManufacturer: {type:String},
+  azureMDMAppId: {type:String},
+  azureModel: {type:String},
+  azureOnPremisesSyncEnabled: {type:String},
+  azureOperatingSystem: {type:String},
+  azureOperatingSystemVersion: {type:String},
+  azureProfileType: {type:String},
+  azureSourceType: {type:String},
+  azureTrustType: {type:String},
   // azure - dates
-  azureDeletedDateTime: {type:Date, default:minDate},
-  azureApproximateLastSignInDateTime: {type:Date, default:minDate},
-  azureComplianceExpirationDateTime: {type:Date, default:minDate},
-  azureCreatedDateTime: {type:Date, default:minDate},
-  azureOnPremisesLastSyncDateTime: {type:Date, default:minDate},
-  azureRegistrationDateTime: {type:Date, default:minDate},
+  azureDeletedDateTime: {type:Date},
+  azureApproximateLastSignInDateTime: {type:Date},
+  azureComplianceExpirationDateTime: {type:Date},
+  azureCreatedDateTime: {type:Date},
+  azureOnPremisesLastSyncDateTime: {type:Date},
+  azureRegistrationDateTime: {type:Date},
   // azure - booleans
   observedByAzure: {type:Boolean, default:false, required:true, index:true},
   azureAccountEnabled: {type:Boolean, default:false},
@@ -62,56 +254,56 @@ export const DeviceSchema = new Schema<Device>({
   azureIsRooted: {type:Boolean, default:false},
 
   // azure managed
-  azureManagedDeviceName: {type:String, default:'UNKNOWN'},
-  azureManagedManagedDeviceName: {type:String, default:'UNKNOWN'},
-  azureManagedId: {type:String, default:'UNKNOWN'},
-  azureManagedUserId: {type:String, default:'UNKNOWN'},
-  azureManagedManagedDeviceOwnerType: {type:String, default:'UNKNOWN'},
-  azureManagedOperatingSystem: {type:String, default:'UNKNOWN'},
-  azureManagedComplianceState: {type:String, default:'UNKNOWN'},
-  azureManagedJailBroken: {type:String, default:'UNKNOWN'},
-  azureManagedManagementAgent: {type:String, default:'UNKNOWN'},
-  azureManagedOperatingSystemVersion: {type:String, default:'UNKNOWN'},
-  azureManagedEASDeviceID: {type:String, default:'UNKNOWN'},
-  azureManagedDeviceEnrollmentType: {type:String, default:'UNKNOWN'},
-  azureManagedActivationLockBypassCode: {type:String, default:'UNKNOWN'},
-  azureManagedEmailAddress: {type:String, default:'UNKNOWN'},
-  azureManagedAzureADDeviceID: {type:String, default:'UNKNOWN'},
-  azureManagedDeviceRegistrationState: {type:String, default:'UNKNOWN'},
-  azureManagedDeviceCategoryDisplayName: {type:String, default:'UNKNOWN'},
-  azureManagedExchangeAccessState: {type:String, default:'UNKNOWN'},
-  azureManagedExchangeAccessStateReason: {type:String, default:'UNKNOWN'},
-  azureManagedRemoteAssistanceSessionUrl: {type:String, default:'UNKNOWN'},
-  azureManagedRemoteAssistanceErrorDetails: {type:String, default:'UNKNOWN'},
-  azureManagedUserPrincipalName: {type:String, default:'UNKNOWN'},
-  azureManagedModel: {type:String, default:'UNKNOWN'},
-  azureManagedManufacturer: {type:String, default:'UNKNOWN'},
-  azureManagedIMEI: {type:String, default:'UNKNOWN'},
-  azureManagedSerialNumber: {type:String, default:'UNKNOWN'},
-  azureManagedPhoneNumber: {type:String, default:'UNKNOWN'},
-  azureManagedAndroidSecurityPatchLevel: {type:String, default:'UNKNOWN'},
-  azureManagedUserDisplayName: {type:String, default:'UNKNOWN'},
-  azureManagedConfigurationManagerClientEnabedFeatures: {type:String, default:'UNKNOWN'},
-  azureManagedWiFiMACAddress: {type:String, default:'UNKNOWN'},
-  azureManagedDeviceHealthAttestationState: {type:String, default:'UNKNOWN'},
-  azureManagedSubscriberCarrier: {type:String, default:'UNKNOWN'},
-  azureManagedMEID: {type:String, default:'UNKNOWN'},
-  azureManagedTotalStorageSpaceInBytes: {type:String, default:'UNKNOWN'},
-  azureManagedFreeStorageSpaceInBytes: {type:String, default:'UNKNOWN'},
-  azureManagedPartnerReportedThreatState: {type:String, default:'UNKNOWN'},
-  azureManagedRequireUserEnrollmentApproval: {type:String, default:'UNKNOWN'},
-  azureManagedICCID: {type:String, default:'UNKNOWN'},
-  azureManagedUDID: {type:String, default:'UNKNOWN'},
-  azureManagedNotes: {type:String, default:'UNKNOWN'},
-  azureManagedEthernetMacAddress: {type:String, default:'UNKNOWN'},
-  azureManagedPhysicalMemoryInBytes: {type:String, default:'UNKNOWN'},
+  azureManagedDeviceName: {type:String},
+  azureManagedManagedDeviceName: {type:String},
+  azureManagedId: {type:String},
+  azureManagedUserId: {type:String},
+  azureManagedManagedDeviceOwnerType: {type:String},
+  azureManagedOperatingSystem: {type:String},
+  azureManagedComplianceState: {type:String},
+  azureManagedJailBroken: {type:String},
+  azureManagedManagementAgent: {type:String},
+  azureManagedOperatingSystemVersion: {type:String},
+  azureManagedEASDeviceID: {type:String},
+  azureManagedDeviceEnrollmentType: {type:String},
+  azureManagedActivationLockBypassCode: {type:String},
+  azureManagedEmailAddress: {type:String},
+  azureManagedAzureADDeviceID: {type:String},
+  azureManagedDeviceRegistrationState: {type:String},
+  azureManagedDeviceCategoryDisplayName: {type:String},
+  azureManagedExchangeAccessState: {type:String},
+  azureManagedExchangeAccessStateReason: {type:String},
+  azureManagedRemoteAssistanceSessionUrl: {type:String},
+  azureManagedRemoteAssistanceErrorDetails: {type:String},
+  azureManagedUserPrincipalName: {type:String},
+  azureManagedModel: {type:String},
+  azureManagedManufacturer: {type:String},
+  azureManagedIMEI: {type:String},
+  azureManagedSerialNumber: {type:String},
+  azureManagedPhoneNumber: {type:String},
+  azureManagedAndroidSecurityPatchLevel: {type:String},
+  azureManagedUserDisplayName: {type:String},
+  azureManagedConfigurationManagerClientEnabedFeatures: {type:String},
+  azureManagedWiFiMACAddress: {type:String},
+  azureManagedDeviceHealthAttestationState: {type:String},
+  azureManagedSubscriberCarrier: {type:String},
+  azureManagedMEID: {type:String},
+  azureManagedTotalStorageSpaceInBytes: {type:String},
+  azureManagedFreeStorageSpaceInBytes: {type:String},
+  azureManagedPartnerReportedThreatState: {type:String},
+  azureManagedRequireUserEnrollmentApproval: {type:String},
+  azureManagedICCID: {type:String},
+  azureManagedUDID: {type:String},
+  azureManagedNotes: {type:String},
+  azureManagedEthernetMacAddress: {type:String},
+  azureManagedPhysicalMemoryInBytes: {type:String},
   // azure managed - dates
-  azureManagedEnrolledDateTime: {type:Date, default:minDate},
-  azureManagedLastSyncDateTime: {type:Date, default:minDate},
-  azureManagedEASActivationDateTime: {type:Date, default:minDate},
-  azureManagedExchangeLastSuccessfulSyncDateTime: {type:Date, default:minDate},
-  azureManagedComplianceGracePeriodExpirationDateTime: {type:Date, default:minDate},
-  azureManagedManagementCertificateExpirationDateTime: {type:Date, default:minDate},
+  azureManagedEnrolledDateTime: {type:Date},
+  azureManagedLastSyncDateTime: {type:Date},
+  azureManagedEASActivationDateTime: {type:Date},
+  azureManagedExchangeLastSuccessfulSyncDateTime: {type:Date},
+  azureManagedComplianceGracePeriodExpirationDateTime: {type:Date},
+  azureManagedManagementCertificateExpirationDateTime: {type:Date},
   // azure managed - boolean
   observedByAzureMDM: {type:Boolean, default:false, required:true, index:true},
   azureManagedIsEASActivated: {type:Boolean, default:false},
@@ -121,60 +313,60 @@ export const DeviceSchema = new Schema<Device>({
 
 
   // connectwise -- user device
-  connectwiseId: {type:String, default:'UNKNOWN'},
-  connectwiseLocation: {type:String, default:'UNKNOWN'},
-  connectwiseClient: {type:String, default:'UNKNOWN'},
-  connectwiseOperatingSystem: {type:String, default:'UNKNOWN'},
-  connectwiseOperatingSystemVersion: {type:String, default:'UNKNOWN'},
-  connectwiseDomainName: {type:String, default:'UNKNOWN'},
-  connectwiseAgentVersion: {type:String, default:'UNKNOWN'},
-  connectwiseComment: {type:String, default:'UNKNOWN'},
-  connectwiseIpAddress: {type:String, default:'UNKNOWN'},
-  connectwiseMacAddress: {type:String, default:'UNKNOWN'},
-  connectwiseLastUserName: {type:String, default:'UNKNOWN'},
-  connectwiseType: {type:String, default:'UNKNOWN'},
-  connectwiseStatus: {type:String, default:'UNKNOWN'},
-  connectwiseSerialNumber: {type:String, default:'UNKNOWN'},
-  connectwiseBiosManufacturer: {type:String, default:'UNKNOWN'},
-  connectwiseModel: {type:String, default:'UNKNOWN'},
-  connectwiseDescription: {type:String, default:'UNKNOWN'},
+  connectwiseId: {type:String},
+  connectwiseLocation: {type:String},
+  connectwiseClient: {type:String},
+  connectwiseOperatingSystem: {type:String},
+  connectwiseOperatingSystemVersion: {type:String},
+  connectwiseDomainName: {type:String},
+  connectwiseAgentVersion: {type:String},
+  connectwiseComment: {type:String},
+  connectwiseIpAddress: {type:String},
+  connectwiseMacAddress: {type:String},
+  connectwiseLastUserName: {type:String},
+  connectwiseType: {type:String},
+  connectwiseStatus: {type:String},
+  connectwiseSerialNumber: {type:String},
+  connectwiseBiosManufacturer: {type:String},
+  connectwiseModel: {type:String},
+  connectwiseDescription: {type:String},
   connectwiseTotalMemory: {type:Number, default:0},
   connectwiseFreeMemory: {type:Number, default:0},
-  connectwiseLastObserved: {type:Date, default:minDate},
-  connectwiseFirstSeen: {type:Date, default:minDate},
-  connectwiseWindowsUpdateDate: {type:Date, default:minDate},
-  connectwiseAntivirusDefinitionDate: {type:Date, default:minDate},
+  connectwiseLastObserved: {type:Date},
+  connectwiseFirstSeen: {type:Date},
+  connectwiseWindowsUpdateDate: {type:Date},
+  connectwiseAntivirusDefinitionDate: {type:Date},
   observedByConnectwise: {type:Boolean, default:false, required:true, index:true},
 
   // crowdstrike
-  crowdstrikeDeviceId: {type:String, default:'UNKNOWN'},
-  crowdstrikeCID: {type:String, default:'UNKNOWN'},
-  crowdstrikeAgentVersion: {type:String, default:'UNKNOWN'},
-  crowdstrikeBIOSManufacturer: {type:String, default:'UNKNOWN'},
-  crowdstrikeBIOSVersion: {type:String, default:'UNKNOWN'},
-  crowdstrikeExternalIP: {type:String, default:'UNKNOWN'},
-  crowdstrikeMACAddress: {type:String, default:'UNKNOWN'},
-  crowdstrikeLocalIP: {type:String, default:'UNKNOWN'},
-  crowdstrikeMachineDomain: {type:String, default:'UNKNOWN'},
-  crowdstrikeMajorVersion: {type:String, default:'UNKNOWN'},
-  crowdstrikeMinorVersion: {type:String, default:'UNKNOWN'},
-  crowdstrikeOSVersion: {type:String, default:'UNKNOWN'},
-  crowdstrikeOSBuild: {type:String, default:'UNKNOWN'},
-  crowdstrikePlatformName: {type:String, default:'UNKNOWN'},
-  crowdstrikeReducedFunctionalityMode: {type:String, default:'UNKNOWN'},
-  crowdstrikeProductTypeDesc: {type:String, default:'UNKNOWN'},
-  crowdstrikeProvisionStatus: {type:String, default:'UNKNOWN'},
-  crowdstrikeSerialNumber: {type:String, default:'UNKNOWN'},
-  crowdstrikeServicePackMajor: {type:String, default:'UNKNOWN'},
-  crowdstrikeServicePackMinor: {type:String, default:'UNKNOWN'},
-  crowdstrikeStatus: {type:String, default:'UNKNOWN'},
-  crowdstrikeSystemManufacturer: {type:String, default:'UNKNOWN'},
-  crowdstrikeSystemProductName: {type:String, default:'UNKNOWN'},
-  crowdstrikeKernelVersion: {type:String, default:'UNKNOWN'},
+  crowdstrikeDeviceId: {type:String},
+  crowdstrikeCID: {type:String},
+  crowdstrikeAgentVersion: {type:String},
+  crowdstrikeBIOSManufacturer: {type:String},
+  crowdstrikeBIOSVersion: {type:String},
+  crowdstrikeExternalIP: {type:String},
+  crowdstrikeMACAddress: {type:String},
+  crowdstrikeLocalIP: {type:String},
+  crowdstrikeMachineDomain: {type:String},
+  crowdstrikeMajorVersion: {type:String},
+  crowdstrikeMinorVersion: {type:String},
+  crowdstrikeOSVersion: {type:String},
+  crowdstrikeOSBuild: {type:String},
+  crowdstrikePlatformName: {type:String},
+  crowdstrikeReducedFunctionalityMode: {type:String},
+  crowdstrikeProductTypeDesc: {type:String},
+  crowdstrikeProvisionStatus: {type:String},
+  crowdstrikeSerialNumber: {type:String},
+  crowdstrikeServicePackMajor: {type:String},
+  crowdstrikeServicePackMinor: {type:String},
+  crowdstrikeStatus: {type:String},
+  crowdstrikeSystemManufacturer: {type:String},
+  crowdstrikeSystemProductName: {type:String},
+  crowdstrikeKernelVersion: {type:String},
   // crowdstrike - datetime
-  crowdstrikeFirstSeenDateTime: {type:Date, default:minDate},
-  crowdstrikeLastSeenDateTime: {type:Date, default:minDate},
-  crowdstrikeModifiedDateTime: {type:Date, default:minDate},
+  crowdstrikeFirstSeenDateTime: {type:Date},
+  crowdstrikeLastSeenDateTime: {type:Date},
+  crowdstrikeModifiedDateTime: {type:Date},
   // crowdstrike - boolean
   observedByCrowdstrike: {type:Boolean, default: false, required:true, index:true},
 
@@ -184,200 +376,26 @@ export const DeviceSchema = new Schema<Device>({
   autoCreate: true,
 })
 
-export interface Device {
-  [key: string]: string | number | boolean | Number | Date | undefined;
-  deviceName:string;
-  deviceFirstObserved?:Date;
-  deviceLastObserved?:Date,
-  deviceIsActive?:boolean;
-  deviceOperatingSystem?:string;
-
-  // active directory
-  observedByActiveDirectory?:boolean;
-  activeDirectoryDN?:string|undefined;
-  activeDirectoryWhenCreated?:Date|undefined;
-  activeDirectoryWhenChanged?:Date|undefined;
-  activeDirectoryLastLogon?:Date|undefined;
-  activeDirectoryPwdLastSet?:Date|undefined;
-  activeDirectoryLogonCount?:Number;
-  activeDirectoryOperatingSystem?:string|undefined;
-  activeDirectoryOperatingSystemVersion?:string|undefined;
-  activeDirectoryDNSHostName?:string|undefined;
-  activeDirectoryLastLogonTimestamp?:Date|undefined;
-
-  // azure
-  observedByAzure?:boolean;
-  azureDisplayName?:string|undefined;
-  azureId?:string|undefined;
-  azureDeviceCategory?:string|undefined;
-  azureDeviceId?:string|undefined;
-  azureDeviceMetadata?:string|undefined;
-  azureDeviceOwnership?:string|undefined;
-  azureDeviceVersion?:string|undefined;
-  azureDomainName?:string|undefined;
-  azureEnrollmentProfileType?:string|undefined;
-  azureEnrollmentType?:string|undefined;
-  azureExternalSourceName?:string|undefined;
-  azureManagementType?:string|undefined;
-  azureManufacturer?:string|undefined;
-  azureMDMAppId?:string|undefined;
-  azureModel?:string|undefined;
-  azureOnPremisesSyncEnabled?:string|undefined;
-  azureOperatingSystem?:string|undefined;
-  azureOperatingSystemVersion?:string|undefined;
-  azureProfileType?:string|undefined;
-  azureSourceType?:string|undefined;
-  azureTrustType?:string|undefined;
-  azureDeletedDateTime?:Date|undefined;
-  azureApproximateLastSignInDateTime?:Date|undefined;
-  azureComplianceExpirationDateTime?:Date|undefined;
-  azureCreatedDateTime?:Date|undefined;
-  azureOnPremisesLastSyncDateTime?:Date|undefined;
-  azureRegistrationDateTime?:Date|undefined;
-  azureAccountEnabled?:boolean;
-  azureIsCompliant?:boolean;
-  azureIsManaged?:boolean;
-  azureIsRooted?:boolean;
-
-
-  // azure managed
-  azureManagedDeviceName?:string|undefined;
-  azureManagedManagedDeviceName?:string|undefined;
-  azureManagedId?:string|undefined;
-  azureManagedUserId?:string|undefined;
-  azureManagedManagedDeviceOwnerType?:string|undefined;
-  azureManagedOperatingSystem?:string|undefined;
-  azureManagedComplianceState?:string|undefined;
-  azureManagedJailBroken?:string|undefined;
-  azureManagedManagementAgent?:string|undefined;
-  azureManagedOperatingSystemVersion?:string|undefined;
-  azureManagedEASDeviceID?:string|undefined;
-  azureManagedDeviceEnrollmentType?:string|undefined;
-  azureManagedActivationLockBypassCode?:string|undefined;
-  azureManagedEmailAddress?:string|undefined;
-  azureManagedAzureADDeviceID?:string|undefined;
-  azureManagedDeviceRegistrationState?:string|undefined;
-  azureManagedDeviceCategoryDisplayName?:string|undefined;
-  azureManagedExchangeAccessState?:string|undefined;
-  azureManagedExchangeAccessStateReason?:string|undefined;
-  azureManagedRemoteAssistanceSessionUrl?:string|undefined;
-  azureManagedRemoteAssistanceErrorDetails?:string|undefined;
-  azureManagedUserPrincipalName?:string|undefined;
-  azureManagedModel?:string|undefined;
-  azureManagedManufacturer?:string|undefined;
-  azureManagedIMEI?:string|undefined;
-  azureManagedSerialNumber?:string|undefined;
-  azureManagedPhoneNumber?:string|undefined;
-  azureManagedAndroidSecurityPatchLevel?:string|undefined;
-  azureManagedUserDisplayName?:string|undefined;
-  azureManagedConfigurationManagerClientEnabedFeatures?:string|undefined;
-  azureManagedWiFiMACAddress?:string|undefined;
-  azureManagedDeviceHealthAttestationState?:string|undefined;
-  azureManagedSubscriberCarrier?:string|undefined;
-  azureManagedMEID?:string|undefined;
-  azureManagedTotalStorageSpaceInBytes?:string|undefined;
-  azureManagedFreeStorageSpaceInBytes?:string|undefined;
-  azureManagedPartnerReportedThreatState?:string|undefined;
-  azureManagedRequireUserEnrollmentApproval?:string|undefined;
-  azureManagedICCID?:string|undefined;
-  azureManagedUDID?:string|undefined;
-  azureManagedNotes?:string|undefined;
-  azureManagedEthernetMacAddress?:string|undefined;
-  azureManagedPhysicalMemoryInBytes?:string|undefined;
-  // azure managed - dates
-  azureManagedEnrolledDateTime?:Date|undefined;
-  azureManagedLastSyncDateTime?:Date|undefined;
-  azureManagedEASActivationDateTime?:Date|undefined;
-  azureManagedExchangeLastSuccessfulSyncDateTime?:Date|undefined;
-  azureManagedComplianceGracePeriodExpirationDateTime?:Date|undefined;
-  azureManagedManagementCertificateExpirationDateTime?:Date|undefined;
-  // azure managed - boolean
-  azureManagedIsEASActivated?:boolean;
-  azureManagedIsAzureADRegistered?:boolean;
-  azureManagedIsSupervised?:boolean;
-  azureManagedIsEncrypted?:boolean;
-  observedByAzureMDM?:boolean;
-
-  // connectwise
-  connectwiseId?:string|undefined;
-  connectwiseLocation?:string|undefined;
-  connectwiseClient?:string|undefined;
-  connectwiseOperatingSystem?:string|undefined;
-  connectwiseOperatingSystemVersion?:string|undefined;
-  connectwiseDomainName?:string|undefined;
-  connectwiseAgentVersion?:string|undefined;
-  connectwiseComment?:string|undefined;
-  connectwiseIpAddress?:string|undefined;
-  connectwiseMacAddress?:string|undefined;
-  connectwiseLastUserName?:string|undefined;
-  connectwiseType?:string|undefined;
-  connectwiseStatus?:string|undefined;
-  connectwiseSerialNumber?:string|undefined;
-  connectwiseBiosManufacturer?:string|undefined;
-  connectwiseModel?:string|undefined;
-  connectwiseDescription?:string|undefined;
-  connectwiseTotalMemory?:Number;
-  connectwiseFreeMemory?:Number;
-  connectwiseLastObserved?:Date|undefined;
-  connectwiseFirstSeen?:Date|undefined;
-  connectwiseWindowsUpdateDate?:Date|undefined;
-  connectwiseAntivirusDefinitionDate?:Date|undefined;
-  observedByConnectwise?:boolean;
-
-  // crowdstrike
-  crowdstrikeDeviceId?:string|undefined;
-  crowdstrikeCID?:string|undefined;
-  crowdstrikeAgentVersion?:string|undefined;
-  crowdstrikeBIOSManufacturer?:string|undefined;
-  crowdstrikeBIOSVersion?:string|undefined;
-  crowdstrikeExternalIP?:string|undefined;
-  crowdstrikeMACAddress?:string|undefined;
-  crowdstrikeLocalIP?:string|undefined;
-  crowdstrikeMachineDomain?:string|undefined;
-  crowdstrikeMajorVersion?:string|undefined;
-  crowdstrikeMinorVersion?:string|undefined;
-  crowdstrikeOSVersion?:string|undefined;
-  crowdstrikeOSBuild?:string|undefined;
-  crowdstrikePlatformName?:string|undefined;
-  crowdstrikeReducedFunctionalityMode?:string|undefined;
-  crowdstrikeProductTypeDesc?:string|undefined;
-  crowdstrikeProvisionStatus?:string|undefined;
-  crowdstrikeSerialNumber?:string|undefined;
-  crowdstrikeServicePackMajor?:string|undefined;
-  crowdstrikeServicePackMinor?:string|undefined;
-  crowdstrikeStatus?:string|undefined;
-  crowdstrikeSystemManufacturer?:string|undefined;
-  crowdstrikeSystemProductName?:string|undefined;
-  crowdstrikeKernelVersion?:string|undefined;
-  // crowdstrike - datetime
-  crowdstrikeFirstSeenDateTime?:Date|undefined;
-  crowdstrikeLastSeenDateTime?:Date|undefined;
-  crowdstrikeModifiedDateTime?:Date|undefined;
-  // crowdstrike - boolean
-  observedByCrowdstrike?:boolean;
-
-}
-
 
 // Virtuals
-DeviceSchema.virtual("type").get(function(this: Device) {
-  //return this.deviceType
-})
+// DeviceSchema.virtual("type").get(function(this: Device) {
+//   //return this.deviceType
+// })
 
 // Methods
-DeviceSchema.methods.getOperatingSystem = function(this: Device) {
-  //return this.operatingSystem
-}
+// DeviceSchema.methods.getOperatingSystem = function(this: Device) {
+//   //return this.operatingSystem
+// }
 
 // Document middlewares
-DeviceSchema.pre<Device>("save", function(next) {
+// DeviceSchema.pre<Device>("save", function(next) {
 
-  // prune objects
-  // if(!this.observedByActiveDirectory) {delete this.observedByActiveDirectory}
-  // if(!this.observedByAzure) {delete this.observedByAzure}
-  // if(!this.observedByAzureMDM) {delete this.observedByAzureMDM}
-  // if(!this.observedByCrowdstrike) {delete this.observedByCrowdstrike}
+//   // prune objects
+//   // if(!this.observedByActiveDirectory) {delete this.observedByActiveDirectory}
+//   // if(!this.observedByAzure) {delete this.observedByAzure}
+//   // if(!this.observedByAzureMDM) {delete this.observedByAzureMDM}
+//   // if(!this.observedByCrowdstrike) {delete this.observedByCrowdstrike}
 
-});
+// });
 
-export default model<Device>('Device', DeviceSchema)
+export default model('Device', DeviceSchema)

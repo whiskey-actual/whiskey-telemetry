@@ -1,6 +1,6 @@
 import mongoose, { Mongoose } from "mongoose";
 import { WhiskeyUtilities } from "whiskey-utilities";
-import { Device } from './Device'
+import * as devices from './Device'
 
 export class Persist {
 
@@ -15,7 +15,7 @@ export class Persist {
   _mongoConnection:Mongoose=new Mongoose()
   _showDetails:Boolean = false
 
-  public async persistDevices(deviceObjects:Device[], logFrequency:number=1000):Promise<Number> {
+  public async persistDevices(deviceObjects:any, logFrequency:number=1000):Promise<Number> {
 
     this._logStack.push("persistDevices");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${deviceObjects.length} devices ..`)
@@ -38,7 +38,7 @@ export class Persist {
 
   }
 
-  private async persistDevice(incomingDeviceObject:Device):Promise<Boolean> {
+  private async persistDevice(incomingDeviceObject:any):Promise<Boolean> {
 
     let isNewDevice:boolean=false;
 
@@ -48,6 +48,7 @@ export class Persist {
       'observedByActiveDirectory',
       'observedByAzure',
       'observedByAzureMDM',
+      'observedByConnectwise',
       'observedByCrowdstrike'
     ]
 
@@ -68,6 +69,8 @@ export class Persist {
       'azureManagedExchangeLastSuccessfulSyncDateTime',
       'azureManagedComplianceGracePeriodExpirationDateTime',
       'azureManagedManagementCertificateExpirationDateTime',
+      'connectwiseFirstSeen',
+      'connectwiseLastObserved',
       'crowdstrikeFirstSeenDateTime',
       'crowdstrikeLastSeenDateTime',
       'crowdstrikeModifiedDateTime',
@@ -80,15 +83,15 @@ export class Persist {
 
     incomingDeviceObject.deviceIsActive = (incomingDeviceObject.deviceLastObserved>lastActiveThreshold)
 
-    const prunedDeviceObject:Device = this.pruneObject(incomingDeviceObject,fieldsToPrune,true);
+    const prunedDeviceObject:any = this.pruneObject(incomingDeviceObject,fieldsToPrune,true);
 
     await mongoose.model('Device').findOne({deviceName:prunedDeviceObject.deviceName}).then(async(result) => {
       if(result) {
 
-        const existingDeviceObject:Device = result._doc
+        const existingDeviceObject:any = result._doc
 
         //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, prunedDeviceObject.deviceName, `.. found existing device`)
-        let updateDeviceObject:Device = {deviceName: existingDeviceObject.deviceName}
+        let updateDeviceObject:any = {deviceName: existingDeviceObject.deviceName}
 
         const prunedDeviceObjectKeys = Object.keys(prunedDeviceObject);
         const existingDeviceObjectKeys = Object.getOwnPropertyNames(existingDeviceObject);
@@ -159,7 +162,7 @@ export class Persist {
         //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Add, this._logStack, `.. new device detected: ${prunedDeviceObject.deviceName}`)
 
         prunedDeviceObject.deviceFirstObserved = new Date()
-        const emptyDeviceObject:Device = {deviceName: prunedDeviceObject.deviceName}
+        const emptyDeviceObject:any = {deviceName: prunedDeviceObject.deviceName}
         prunedDeviceObject.operatingSystem = this.normalizeOperatingSystem(emptyDeviceObject, prunedDeviceObject)
 
         await mongoose.model('Device').updateOne(
@@ -184,7 +187,7 @@ export class Persist {
 
   }
 
-  private pruneObject(obj:Device, keys:string[], valueToKeep:any):Device {
+  private pruneObject(obj:any, keys:string[], valueToKeep:any):any {
     for(let i=0; i<keys.length; i++) {
       if(Object.keys(obj).includes(keys[i]) && obj[keys[i]]!=valueToKeep) {
         //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, obj.deviceName, `pruning key: ${obj[keys[i]]}`)
@@ -209,7 +212,7 @@ export class Persist {
     return output
   }
 
-  private determineDeviceType(determinedOperatingSystem:string, existingDeviceObject:Device, newDeviceObject:Device):string {
+  private determineDeviceType(determinedOperatingSystem:string, existingDeviceObject:any, newDeviceObject:any):string {
 
     let output:any = 'UNKNOWN'
     this._logStack.push('determineDeviceType')
@@ -260,7 +263,7 @@ export class Persist {
 
   }
 
-  private normalizeOperatingSystem(existingDeviceObject:Device, newDeviceObject:Device):string {
+  private normalizeOperatingSystem(existingDeviceObject:any, newDeviceObject:any):string {
 
     let output:any = 'UNKNOWN';
     this._logStack.push('normalizeOperatingSystem')

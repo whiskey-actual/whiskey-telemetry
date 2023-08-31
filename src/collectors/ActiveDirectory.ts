@@ -1,6 +1,6 @@
 import { Client } from 'ldapts'
 import { WhiskeyUtilities } from 'whiskey-utilities'
-import { Device } from '../Device'
+import { ActiveDirectoryDevice } from '../Device'
 import fs from 'fs'
 
 
@@ -28,9 +28,9 @@ export class ActiveDirectory
   _sizeLimit:number=500
 
 
-  public async query():Promise<Device[]> {
+  public async query():Promise<ActiveDirectoryDevice[]> {
 
-    let output:Array<Device> = []
+    let output:Array<ActiveDirectoryDevice> = []
     this._logStack.push('ActiveDirectory')
     this._logStack.push('query')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
@@ -64,18 +64,21 @@ export class ActiveDirectory
       WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${searchEntries.length} devices, creating objects .. `)
 
       for(let i=0; i<searchEntries.length; i++) {
-        const device:Device = {deviceName: searchEntries[i].cn.toString()}
-        device.observedByActiveDirectory = true;
-        device.activeDirectoryDN = searchEntries[i].dn.toString();
-        device.activeDirectoryWhenCreated=searchEntries[i].whenCreated ? this.ldapTimestampToJS(searchEntries[i].whenCreated.toString()) : undefined;
-        device.activeDirectoryWhenChanged=searchEntries[i].whenChanged ? this.ldapTimestampToJS(searchEntries[i].whenChanged.toString()) : undefined;
-        device.activeDirectoryLastLogon=searchEntries[i].lastLogon ? this.ldapTimestampToJS(searchEntries[i].lastLogon.toString()) : undefined;
-        device.activeDirectoryPwdLastSet=searchEntries[i].pwdLastSet ? this.ldapTimestampToJS(searchEntries[i].pwdLastSet.toString()) : undefined;
-        device.activeDirectoryLogonCount=searchEntries[i].logonCount ? Number(searchEntries[i].logonCount) : undefined
-        device.activeDirectoryOperatingSystem=searchEntries[i].operatingSystem ? searchEntries[i].operatingSystem.toString() : undefined;
-        device.activeDirectoryOperatingSystemVersion=searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined;
-        device.activeDirectoryDNSHostName=searchEntries[i].dNSHostName ? searchEntries[i].dNSHostName.toString() : undefined;
-        device.activeDirectoryLastLogonTimestamp=searchEntries[i].lastLogonTimestamp ? this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString()) : undefined;
+        const device:ActiveDirectoryDevice = {
+          deviceName: searchEntries[i].cn.toString(),
+          observedByActiveDirectory: true,
+          activeDirectoryDN: searchEntries[i].dn.toString(),
+          activeDirectoryWhenCreated: this.ldapTimestampToJS(searchEntries[i].whenCreated.toString()),
+          activeDirectoryWhenChanged: this.ldapTimestampToJS(searchEntries[i].whenChanged.toString()),
+          activeDirectoryLastLogon: this.ldapTimestampToJS(searchEntries[i].lastLogon.toString()),
+          activeDirectoryPwdLastSet: this.ldapTimestampToJS(searchEntries[i].pwdLastSet.toString()),
+          activeDirectoryLogonCount: Number(searchEntries[i].logonCount),
+          activeDirectoryOperatingSystem: searchEntries[i].operatingSystem.toString(),
+          activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion.toString(),
+          activeDirectoryDNSHostName: searchEntries[i].dNSHostName.toString(),
+          activeDirectoryLastLogonTimestamp: this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString())
+        }
+
         output.push(device)
         //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, 'queryActiveDirectory', `${device.activeDirectoryName} (${device.activeDirectoryOperatingSystem})`)
       }
@@ -89,7 +92,7 @@ export class ActiveDirectory
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
     this._logStack.pop()
-    return new Promise<Device[]>((resolve) => {resolve(output)})
+    return new Promise<ActiveDirectoryDevice[]>((resolve) => {resolve(output)})
 
   }
 
