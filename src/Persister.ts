@@ -195,6 +195,9 @@ export class Persist {
         if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, obj.deviceName, `pruning key: ${[keys[i]]} (${obj[keys[i]]})`) }
         delete obj[keys[i]]
       }
+      else {
+        if(this._debugOutput) { WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, obj.deviceName, `keeping key: ${[keys[i]]} (${obj[keys[i]]})`) }
+      }
     }
     return obj
   }
