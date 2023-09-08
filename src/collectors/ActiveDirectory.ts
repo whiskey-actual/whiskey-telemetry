@@ -96,7 +96,7 @@ export class ActiveDirectory
 
     for(let i=0; i<devices.length; i++) {
       try {
-        let result = await pool.request()
+        const result = await pool.request()
         .input('deviceName', sql.VarChar(64), devices[i].deviceName)
         .input('activeDirectoryDN', sql.VarChar(255), devices[i].activeDirectoryDN)
         .input('activeDirectoryOperatingSystem', sql.VarChar(255), devices[i].activeDirectoryOperatingSystem)
@@ -110,7 +110,7 @@ export class ActiveDirectory
         .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, devices[i].activeDirectoryLastLogonTimestamp)
         .execute('sp_add_device_activeDirectory')
 
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, this._logStack, `${result}`)
+        console.debug(result)
         
       }
       catch(err) {
