@@ -4,6 +4,7 @@
     "axios": "^1.5.0",
     "ldapts": "^6.0.0",
     "mongoose": "^7.5.0",
+    "mssql": "^10.0.0",
     "whiskey-utilities": "^1.0.27"
   },
   "version": "1.0.24",
@@ -13,7 +14,6 @@
   "files": [
     "lib/**/*"
   ],
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/whiskey-actual/whiskey-telemetry/issues"
   },
-  "homepage": "https://github.com/whiskey-actual/whiskey-telemetry#readme"
+  "homepage": "https://github.com/whiskey-actual/whiskey-telemetry#readme",
+  "devDependencies": {
+    "@types/mssql": "^8.1.2"
+  }
 }

@@ -297,10 +297,10 @@ export class Persist {
         }
       }
 
-      // for(let i=0; i<Object.keys(allValues).length; i++) {
-      //   WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, newDeviceObject.deviceName, `.. found OS: ${Object.keys(allValues)[i]}: ${Object.values(allValues)[i]}`)
-      //   Object.values(allValues)[0]
-      // }
+      for(let i=0; i<Object.keys(allValues).length; i++) {
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, newDeviceObject.deviceName, `.. found OS: ${Object.keys(allValues)[i]}: ${Object.values(allValues)[i]}`)
+        Object.values(allValues)[0]
+      }
 
       Object.keys(allValues).length>0 ? output=Object.values(allValues)[0]?.toString() : 'UNKNOWN'
 
