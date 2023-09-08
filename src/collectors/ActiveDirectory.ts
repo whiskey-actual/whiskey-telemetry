@@ -99,7 +99,6 @@ export class ActiveDirectory
       try {
         let result = await pool.request()
         .input('deviceName', sql.VarChar(64), devices[i].deviceName)
-        .input('observedByActiveDirectory', sql.Bit, 1)
         .input('activeDirectoryDN', sql.VarChar(255), devices[i].activeDirectoryDN)
         .input('activeDirectoryOperatingSystem', sql.VarChar(255), devices[i].activeDirectoryOperatingSystem)
         .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), devices[i].activeDirectoryOperatingSystemVersion)
@@ -110,7 +109,6 @@ export class ActiveDirectory
         .input('activeDirectoryLastLogon', sql.DateTime2, devices[i].activeDirectoryLastLogon)
         .input('activeDirectoryPwdLastSet', sql.DateTime2, devices[i].activeDirectoryPwdLastSet)
         .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, devices[i].activeDirectoryLastLogonTimestamp)
-        .output('deviceId', sql.Int)
         .execute('sp_add_device_activeDirectory')
       }
       catch(err) {
