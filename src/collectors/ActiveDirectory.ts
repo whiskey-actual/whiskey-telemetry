@@ -85,13 +85,13 @@ export class ActiveDirectory
 
   }
 
-  public async persist(sqlConnectionString:string, devices:ActiveDirectoryDevice[]):Promise<Boolean> {
+  public async persist(sqlConfig:any, devices:ActiveDirectoryDevice[]):Promise<Boolean> {
 
     this._logStack.push("persist");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${devices.length} devices ..`)
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConnectionString} ..`)
-    let pool = await sql.connect(sqlConnectionString)
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
+    let pool = await sql.connect(sqlConfig)
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, continung ..`)
 
     for(let i=0; i<devices.length; i++) {
