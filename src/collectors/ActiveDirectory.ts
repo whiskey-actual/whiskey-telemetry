@@ -18,7 +18,7 @@ export class ActiveDirectory
   _showDebug:boolean=false;
   
 
-  public async query(ldapURL:string, bindDN:string, pw:string, searchDN:string, filePathToCACert:string, isPaged:boolean=true, sizeLimit:number=500):Promise<ActiveDirectoryDevice[]> {
+  public async query(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<ActiveDirectoryDevice[]> {
 
     let output:Array<ActiveDirectoryDevice> = []
     this._logStack.push('query')
@@ -30,7 +30,6 @@ export class ActiveDirectory
         url: ldapURL,
         tlsOptions:
           {
-            ca: [ fs.readFileSync(filePathToCACert) ],
             rejectUnauthorized: false
           }
       }
