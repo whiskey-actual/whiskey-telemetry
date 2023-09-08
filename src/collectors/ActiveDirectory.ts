@@ -92,10 +92,9 @@ export class ActiveDirectory
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
     let pool = await sql.connect(sqlConfig)
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, continung ..`)
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, persisting devices .. `)
 
     for(let i=0; i<devices.length; i++) {
-
       try {
         let result = await pool.request()
         .input('deviceName', sql.VarChar(64), devices[i].deviceName)
@@ -110,6 +109,9 @@ export class ActiveDirectory
         .input('activeDirectoryPwdLastSet', sql.DateTime2, devices[i].activeDirectoryPwdLastSet)
         .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, devices[i].activeDirectoryLastLogonTimestamp)
         .execute('sp_add_device_activeDirectory')
+
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, this._logStack, `${result}`)
+        
       }
       catch(err) {
         WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)
@@ -117,6 +119,8 @@ export class ActiveDirectory
         throw(err)
       }
     }
+
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `done.`)
     
     this._logStack.pop()
     return new Promise<Boolean>((resolve) => {resolve(true)})
