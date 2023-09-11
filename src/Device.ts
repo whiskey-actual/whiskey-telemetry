@@ -246,7 +246,7 @@ export const DeviceSchema = new Schema({
   azureOnPremisesLastSyncDateTime: {type:Date},
   azureRegistrationDateTime: {type:Date},
   // azure - booleans
-  azureOnPremisesSyncEnabled: {Boolean, default:false},
+  azureOnPremisesSyncEnabled: {type:Boolean, default:false},
   azureAccountEnabled: {type:Boolean, default:false},
   azureIsCompliant: {type:Boolean, default:false},
   azureIsManaged: {type:Boolean, default:false},
