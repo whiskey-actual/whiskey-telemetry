@@ -298,7 +298,6 @@ export class Persist {
       }
 
       for(let i=0; i<Object.keys(allValues).length; i++) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Debug, newDeviceObject.deviceName, `.. found OS: ${Object.keys(allValues)[i]}: ${Object.values(allValues)[i]}`)
         Object.values(allValues)[0]
       }
 
