@@ -43,7 +43,7 @@ export interface AzureActiveDirectoryDevice {
   azureManufacturer: string;
   azureMDMAppId: string;
   azureModel: string;
-  azureOnPremisesSyncEnabled: string;
+  
   azureOperatingSystem: string;
   azureOperatingSystemVersion: string;
   azureProfileType: string;
@@ -57,7 +57,7 @@ export interface AzureActiveDirectoryDevice {
   azureOnPremisesLastSyncDateTime: Date;
   azureRegistrationDateTime: Date;
   // booleans
-
+  azureOnPremisesSyncEnabled: boolean;
   azureAccountEnabled: boolean;
   azureIsCompliant: boolean;
   azureIsManaged: boolean;

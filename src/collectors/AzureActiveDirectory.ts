@@ -76,11 +76,11 @@ export class AzureActiveDirectory {
         azureCreatedDateTime: new Date(deviceList[i].createdDateTime),
         azureOnPremisesLastSyncDateTime: new Date(deviceList[i].onPremisesLastSyncDateTime),
         azureRegistrationDateTime: new Date(deviceList[i].registrationDateTime),
-        azureOnPremisesSyncEnabled: deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled : undefined,
-        azureAccountEnabled: deviceList[i].accountEnabled ? deviceList[i].accountEnabled : undefined,
-        azureIsCompliant: deviceList[i].isCompliant ? deviceList[i].isCompliant : undefined,
-        azureIsManaged: deviceList[i].isManaged ? deviceList[i].isManaged : undefined,
-        azureIsRooted: deviceList[i].isRooted ? deviceList[i].isRooted : undefined,
+        azureOnPremisesSyncEnabled: deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled : false,
+        azureAccountEnabled: deviceList[i].accountEnabled ? deviceList[i].accountEnabled : false,
+        azureIsCompliant: deviceList[i].isCompliant ? deviceList[i].isCompliant : false,
+        azureIsManaged: deviceList[i].isManaged ? deviceList[i].isManaged : false,
+        azureIsRooted: deviceList[i].isRooted ? deviceList[i].isRooted : false,
       }
 
       output.push(d)
