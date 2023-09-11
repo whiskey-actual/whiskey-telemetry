@@ -7,7 +7,6 @@ export interface Device {
 export interface ActiveDirectoryDevice {
   // mandatory
   deviceName: string,
-  observedByActiveDirectory: boolean,
   // strings
   activeDirectoryDN: string,
   activeDirectoryOperatingSystem?: string|undefined,
@@ -26,7 +25,6 @@ export interface ActiveDirectoryDevice {
 export interface AzureActiveDirectoryDevice {
   // mandatory
   deviceName: string,
-  observedByAzure: boolean;
   //strings
   azureDisplayName: string,
   azureId: string;
@@ -43,7 +41,6 @@ export interface AzureActiveDirectoryDevice {
   azureManufacturer: string;
   azureMDMAppId: string;
   azureModel: string;
-  
   azureOperatingSystem: string;
   azureOperatingSystemVersion: string;
   azureProfileType: string;
@@ -218,9 +215,6 @@ export const DeviceSchema = new Schema({
   activeDirectoryLastLogon: {type:Date},
   activeDirectoryPwdLastSet: {type:Date},
   activeDirectoryLastLogonTimestamp: {type:Date},
-  // active directory - booleans
-  observedByActiveDirectory: {type:Boolean, default:false, required:true, index:true},
-
 
   // azure
   azureDisplayName: {type:String},
@@ -238,7 +232,7 @@ export const DeviceSchema = new Schema({
   azureManufacturer: {type:String},
   azureMDMAppId: {type:String},
   azureModel: {type:String},
-  azureOnPremisesSyncEnabled: {type:String},
+  
   azureOperatingSystem: {type:String},
   azureOperatingSystemVersion: {type:String},
   azureProfileType: {type:String},
@@ -252,7 +246,7 @@ export const DeviceSchema = new Schema({
   azureOnPremisesLastSyncDateTime: {type:Date},
   azureRegistrationDateTime: {type:Date},
   // azure - booleans
-  observedByAzure: {type:Boolean, default:false, required:true, index:true},
+  azureOnPremisesSyncEnabled: {Boolean, default:false},
   azureAccountEnabled: {type:Boolean, default:false},
   azureIsCompliant: {type:Boolean, default:false},
   azureIsManaged: {type:Boolean, default:false},

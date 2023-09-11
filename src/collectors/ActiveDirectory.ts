@@ -54,7 +54,6 @@ export class ActiveDirectory
       for(let i=0; i<searchEntries.length; i++) {
         const device:ActiveDirectoryDevice = {
           deviceName: searchEntries[i].cn.toString(),
-          observedByActiveDirectory: true,
           activeDirectoryDN: searchEntries[i].dn.toString(),
           activeDirectoryOperatingSystem: searchEntries[i].operatingSystem? searchEntries[i].operatingSystem.toString() : undefined,
           activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined,
