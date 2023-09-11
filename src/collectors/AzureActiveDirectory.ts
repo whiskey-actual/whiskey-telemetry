@@ -193,7 +193,6 @@ export class AzureActiveDirectory {
         .input('azureManufacturer', sql.VarChar(64), devices[i].azureManufacturer)
         .input('azureMDMAppId', sql.VarChar(64), devices[i].azureMDMAppId)
         .input('azureModel', sql.VarChar(64), devices[i].azureModel)
-        .input('azureOnPremisesSyncEnabled', sql.VarChar(64), devices[i].azureOnPremisesSyncEnabled)
         .input('azureOperatingSystem', sql.VarChar(64), devices[i].azureOperatingSystem)
         .input('azureOperatingSystemVersion', sql.VarChar(64), devices[i].azureOperatingSystemVersion)
         .input('azureProfileType', sql.VarChar(64), devices[i].azureProfileType)
@@ -207,6 +206,7 @@ export class AzureActiveDirectory {
         .input('azureOnPremisesLastSyncDateTime', sql.DateTime2, devices[i].azureOnPremisesLastSyncDateTime)
         .input('azureRegistrationDateTime', sql.DateTime2, devices[i].azureRegistrationDateTime)
         // booleans
+        .input('azureOnPremisesSyncEnabled', sql.Bit, devices[i].azureOnPremisesSyncEnabled)
         .input('azureAccountEnabled', sql.Bit, devices[i].azureAccountEnabled)
         .input('azureIsCompliant', sql.Bit, devices[i].azureIsCompliant)
         .input('azureIsManaged', sql.Bit, devices[i].azureIsManaged)
