@@ -18,7 +18,7 @@ export class AzureActiveDirectory {
 
   public async query(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<AzureActiveDirectoryDevice[]> {
 
-    this._logStack.push('Azure')
+    this._logStack.push('AzureActiveDirectory')
     this._logStack.push('query')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
@@ -65,7 +65,6 @@ export class AzureActiveDirectory {
         azureManufacturer: deviceList[i].manufacturer ? deviceList[i].manufacturer.toString() : undefined,
         azureMDMAppId: deviceList[i].mdmAppId ? deviceList[i].mdmAppId.toString() : undefined,
         azureModel: deviceList[i].model ? deviceList[i].model.toString() : undefined,
-        azureOnPremisesSyncEnabled: deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled.toString() : undefined,
         azureOperatingSystem: deviceList[i].operaingSystem ? deviceList[i].operaingSystem.toString() : undefined,
         azureOperatingSystemVersion: deviceList[i].operatingSystemVersion ? deviceList[i].operatingSystemVersion.toString() : undefined,
         azureProfileType: deviceList[i].profileType ? deviceList[i].profileType.toString() : undefined,
@@ -77,6 +76,7 @@ export class AzureActiveDirectory {
         azureCreatedDateTime: new Date(deviceList[i].createdDateTime),
         azureOnPremisesLastSyncDateTime: new Date(deviceList[i].onPremisesLastSyncDateTime),
         azureRegistrationDateTime: new Date(deviceList[i].registrationDateTime),
+        azureOnPremisesSyncEnabled: deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled : undefined,
         azureAccountEnabled: deviceList[i].accountEnabled ? deviceList[i].accountEnabled : undefined,
         azureIsCompliant: deviceList[i].isCompliant ? deviceList[i].isCompliant : undefined,
         azureIsManaged: deviceList[i].isManaged ? deviceList[i].isManaged : undefined,
