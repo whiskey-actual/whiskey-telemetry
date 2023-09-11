@@ -23,7 +23,7 @@ export interface ActiveDirectoryDevice {
   activeDirectoryLastLogonTimestamp: Date|undefined
 }
 
-export interface AzureDevice {
+export interface AzureActiveDirectoryDevice {
   // mandatory
   deviceName: string,
   observedByAzure: boolean;
