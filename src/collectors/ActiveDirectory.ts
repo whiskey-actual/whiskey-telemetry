@@ -2,8 +2,6 @@ import { Client } from 'ldapts'
 import { WhiskeyUtilities } from 'whiskey-utilities'
 import { ActiveDirectoryDevice } from '../Device'
 import sql from 'mssql'
-import fs from 'fs'
-
 
 export class ActiveDirectory
 {
@@ -109,9 +107,7 @@ export class ActiveDirectory
         .input('activeDirectoryPwdLastSet', sql.DateTime2, devices[i].activeDirectoryPwdLastSet)
         .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, devices[i].activeDirectoryLastLogonTimestamp)
         .execute('sp_add_device_activeDirectory')
-
-        console.debug(result)
-        
+        //console.debug(result)        
       }
       catch(err) {
         WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)

@@ -87,7 +87,7 @@ export class AzureActiveDirectory {
     }
 
     this._logStack.pop()
-    return new Promise<AzureDevice[]>((resolve) => {resolve(output)})
+    return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }
 
   private async getToken(AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, TENANT_ID:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<msal.AuthenticationResult> {
