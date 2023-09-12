@@ -15,12 +15,11 @@ export class Connectwise
   _logStack:string[]=[]
   _showDetails:boolean=false;
   _showDebug:boolean=false;
-  
-  public async query(baseURL:string, clientId:string, userName:string, password:string):Promise<ConnectwiseDevice[]> {
+
+  public async fetch(baseURL:string, clientId:string, userName:string, password:string):Promise<ConnectwiseDevice[]> {
 
     let output:Array<ConnectwiseDevice> = []
-    this._logStack.push('Connectwise')
-    this._logStack.push('query')
+    this._logStack.push('fetch')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
@@ -104,7 +103,6 @@ export class Connectwise
     }
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
     this._logStack.pop()
     return new Promise<ConnectwiseDevice[]>((resolve) => {resolve(output)})
   }

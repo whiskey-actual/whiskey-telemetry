@@ -21,10 +21,8 @@ export class AzureManaged {
   _CLIENT_ID:string=''
   _CLIENT_SECRET:string=''
 
-  public async query():Promise<AzureManagedDevice[]> {
-
-    this._logStack.push('AzureManaged')
-    this._logStack.push('query')
+  public async fetch():Promise<AzureManagedDevice[]> {
+    this._logStack.push('fetch')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
@@ -35,7 +33,6 @@ export class AzureManaged {
     output = await this.managedDevices(accessToken);
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
     this._logStack.pop()
     return new Promise<AzureManagedDevice[]>((resolve) => {resolve(output)})
   }

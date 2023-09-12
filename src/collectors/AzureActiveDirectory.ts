@@ -16,10 +16,8 @@ export class AzureActiveDirectory {
   _showDebug:boolean=false;
   
 
-  public async query(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<AzureActiveDirectoryDevice[]> {
-
-    this._logStack.push('AzureActiveDirectory')
-    this._logStack.push('query')
+  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<AzureActiveDirectoryDevice[]> {
+    this._logStack.push('fetch')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
@@ -31,7 +29,6 @@ export class AzureActiveDirectory {
     output = await this.devices(GRAPH_ENDPOINT, accessToken);
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
     this._logStack.pop()
     return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }

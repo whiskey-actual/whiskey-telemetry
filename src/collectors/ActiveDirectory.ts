@@ -16,10 +16,10 @@ export class ActiveDirectory
   _showDebug:boolean=false;
   
 
-  public async query(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<ActiveDirectoryDevice[]> {
+  public async fetch(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<ActiveDirectoryDevice[]> {
 
     let output:Array<ActiveDirectoryDevice> = []
-    this._logStack.push('query')
+    this._logStack.push('fetch')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, 'initializing ..')
 
 

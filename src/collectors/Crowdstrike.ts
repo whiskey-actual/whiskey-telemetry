@@ -17,11 +17,10 @@ export class Crowdstrike
   
 
 
-  public async query(baseURL:string, clientId:string, clientSecret:string):Promise<CrowdstrikeDevice[]> {
+  public async fetch(baseURL:string, clientId:string, clientSecret:string):Promise<CrowdstrikeDevice[]> {
 
     let output:Array<CrowdstrikeDevice> = []
-    this._logStack.push('Crowdstrike')
-    this._logStack.push('query')
+    this._logStack.push('fetch')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
@@ -38,7 +37,6 @@ export class Crowdstrike
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${output.length} devices received.`)
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
     this._logStack.pop()
     return new Promise<CrowdstrikeDevice[]>((resolve) => {resolve(output)})
   }
