@@ -50,7 +50,7 @@ export class MongoPersister {
 
     const fieldsToPrune:string[] = [
       'observedByActiveDirectory',
-      'observedByAzure',
+      'observedByAzureActiveDirectory',
       'observedByAzureMDM',
       'observedByConnectwise',
       'observedByCrowdstrike'
