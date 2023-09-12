@@ -7,21 +7,16 @@ import { ConnectwiseDevice } from '../Device'
 export class Connectwise
 {
 
-  constructor(logStack:string[], baseURL:string, clientId:string, userName:string, password:string) {
+  constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
-    this._baseURL=baseURL
-    this._clientId=clientId
-    this._userName=userName
-    this._password=password
+    this._showDetails=showDetails;
+    this._showDebug=showDebug;
   }
-
   _logStack:string[]=[]
-  _baseURL:string=''
-  _clientId:string=''
-  _userName:string=''
-  _password:string=''
-
-  public async query():Promise<ConnectwiseDevice[]> {
+  _showDetails:boolean=false;
+  _showDebug:boolean=false;
+  
+  public async query(baseURL:string, clientId:string, userName:string, password:string):Promise<ConnectwiseDevice[]> {
 
     let output:Array<ConnectwiseDevice> = []
     this._logStack.push('Connectwise')
@@ -32,8 +27,8 @@ export class Connectwise
 
     const httpsAgent = new https.Agent({ rejectUnauthorized: false})
     axios.defaults.httpsAgent=httpsAgent;
-    const instance = axios.create({baseURL: this._baseURL, headers: {clientId: this._clientId}});
-    const response = await instance.post('/apitoken', { UserName: this._userName, Password: this._password});
+    const instance = axios.create({baseURL: baseURL, headers: {clientId: clientId}});
+    const response = await instance.post('/apitoken', { UserName: userName, Password: password});
     const accessToken = response.data.AccessToken;
     instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received accessToken ..`)

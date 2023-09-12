@@ -1,8 +1,7 @@
 import mongoose, { Mongoose } from "mongoose";
 import { WhiskeyUtilities } from "whiskey-utilities";
-import * as devices from './Device'
 
-export class Persist {
+export class MongoPersister {
 
   constructor(logStack:string[], mongoConnection:Mongoose, showDetails:boolean=false, debugOutput:boolean=false) {
     this._logStack = logStack;
@@ -18,22 +17,25 @@ export class Persist {
   _debugOutput = false
 
   public async persistDevices(deviceObjects:any, logFrequency:number=1000):Promise<Number> {
-
     this._logStack.push("persistDevices");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${deviceObjects.length} devices ..`)
-    const startDate = new Date()
 
-    for(let i=0;i<deviceObjects.length; i++) {
-      const isNewDevice = await this.persistDevice(deviceObjects[i])
-      if(i>0 && i%logFrequency==0) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', i, deviceObjects.length, startDate, new Date()));
+    try {
+      const startDate = new Date()
+      for(let i=0;i<deviceObjects.length; i++) {
+        const isNewDevice = await this.persistDevice(deviceObjects[i])
+        if(i>0 && i%logFrequency==0) {
+          WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', i, deviceObjects.length, startDate, new Date()));
+        }
+        if(isNewDevice) {
+          WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Add, this._logStack, `.. persisted new device: ${deviceObjects[i].deviceName}`)
+        }
       }
-      if(isNewDevice) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Add, this._logStack, `.. persisted new device: ${deviceObjects[i].deviceName}`)
-      }
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. persisted ${deviceObjects.length} devices`)
+    } catch(err) {
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `${err}`)
+      throw(err);
     }
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. persisted ${deviceObjects.length} devices`)
 
     this._logStack.pop();
     return new Promise<Number>((resolve) => {resolve(deviceObjects.length)})

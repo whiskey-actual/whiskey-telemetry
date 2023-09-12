@@ -6,19 +6,18 @@ import { CrowdstrikeDevice } from '../Device'
 export class Crowdstrike
 {
 
-  constructor(logStack:string[], baseURL:string, clientId:string, clientSecret:string) {
+  constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
-    this._baseURL=baseURL
-    this._clientId=clientId
-    this._clientSecret=clientSecret
+    this._showDetails=showDetails;
+    this._showDebug=showDebug;
   }
-
   _logStack:string[]=[]
-  _baseURL:string=''
-  _clientId:string=''
-  _clientSecret:string=''
+  _showDetails:boolean=false;
+  _showDebug:boolean=false;
+  
 
-  public async query():Promise<CrowdstrikeDevice[]> {
+
+  public async query(baseURL:string, clientId:string, clientSecret:string):Promise<CrowdstrikeDevice[]> {
 
     let output:Array<CrowdstrikeDevice> = []
     this._logStack.push('Crowdstrike')
@@ -27,8 +26,8 @@ export class Crowdstrike
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
 
-    const instance = axios.create({baseURL: this._baseURL});
-    const response = await instance.post(`/oauth2/token?client_id=${this._clientId}&client_secret=${this._clientSecret}`)
+    const instance = axios.create({baseURL: baseURL});
+    const response = await instance.post(`/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}`)
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. access token received; querying devices ..`)
 
