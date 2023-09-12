@@ -23,7 +23,7 @@ export class Telemetry {
 
 
     public async isMongoDatabaseOK(mongoAdminURI:string, mongoURI:string, db:string):Promise<boolean> {
-        this._logstack.push('checkMongoDatabase');
+        this._logstack.push('isMongoDatabaseOK');
         let output:boolean = false;
 
         try {

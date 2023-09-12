@@ -80,7 +80,7 @@ export class MongoDatabase {
 
     try {
       const doc = await admin.validateCollection(collectionName)
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack,`.. collection ${collectionName} OK. (found ${doc.records} records)`)
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack,`.. collection ${collectionName} OK. (found ${doc} records)`)
       output=true
     } catch (err:any) {
       WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, err)

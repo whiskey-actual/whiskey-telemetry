@@ -16,7 +16,7 @@ export class MongoPersister {
   _showDetails:Boolean = false
   _debugOutput = false
 
-  public async persistDevices(deviceObjects:any, logFrequency:number=1000):Promise<Number> {
+  public async persistDevices(deviceObjects:any[], logFrequency:number=1000):Promise<Number> {
     this._logStack.push("persistDevices");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${deviceObjects.length} devices ..`)
 
