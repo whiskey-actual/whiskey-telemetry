@@ -16,10 +16,12 @@ import { Crowdstrike } from './collectors/Crowdstrike'
 
 export class Telemetry {
 
-    constructor(logStack:string[]) {
+    constructor(logStack:string[], mongooseConnection:Mongoose) {
         this._logstack=logStack
+        this._mongooseConnection = mongooseConnection
     }
     _logstack:string[]=[]
+    _mongooseConnection:Mongoose=new Mongoose()
 
 
     public async isMongoDatabaseOK(mongoAdminURI:string, mongoURI:string, db:string):Promise<boolean> {
@@ -38,13 +40,13 @@ export class Telemetry {
         return new Promise<boolean>((resolve) => {resolve(output)})
     }
 
-    public async persistToMongo(mongoConnection:Mongoose, deviceObjects:any, logFrequency:number=1000, showDetails:boolean=false, showDebug:boolean=false) {
+    public async persistToMongo(deviceObjects:any, logFrequency:number=1000, showDetails:boolean=false, showDebug:boolean=false) {
         this._logstack.push('persistToMongo');
         let output:boolean = false;
 
         try {
-            const mp = new MongoPersister(this._logstack, mongoConnection, showDetails, showDebug)
-            mp.persistDevices(deviceObjects, logFrequency);
+            const mp = new MongoPersister(this._logstack, this._mongooseConnection, showDetails, showDebug)
+            await mp.persistDevices(deviceObjects, logFrequency);
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
             throw(err);
@@ -52,9 +54,6 @@ export class Telemetry {
         
         this._logstack.pop()
         return new Promise<boolean>((resolve) => {resolve(output)})
-
-        
-
     }
 
     public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<ActiveDirectoryDevice[]> {
