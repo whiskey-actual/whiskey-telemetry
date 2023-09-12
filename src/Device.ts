@@ -7,6 +7,7 @@ export interface Device {
 export interface ActiveDirectoryDevice {
   // mandatory
   deviceName: string,
+  observedByActiveDirectory: boolean,
   // strings
   activeDirectoryDN: string,
   activeDirectoryOperatingSystem?: string|undefined,
@@ -25,6 +26,7 @@ export interface ActiveDirectoryDevice {
 export interface AzureActiveDirectoryDevice {
   // mandatory
   deviceName: string,
+  observedByAzureActiveDirectory: boolean,
   //strings
   azureDisplayName: string,
   azureId: string;

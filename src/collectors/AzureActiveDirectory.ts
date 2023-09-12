@@ -46,6 +46,7 @@ export class AzureActiveDirectory {
     for(let i=0; i<deviceList.length; i++) {
       const d:AzureActiveDirectoryDevice = {
         deviceName: deviceList[i].displayName.toString(),
+        observedByAzureActiveDirectory: true,
         azureDisplayName: deviceList[i].displayName.toString(),
         azureId: deviceList[i].id,
         azureDeviceCategory: deviceList[i].deviceCategory ? deviceList[i].deviceCategory.toString() : undefined,
