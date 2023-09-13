@@ -20,14 +20,15 @@ export class MicrosoftSql {
         try {
 
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
-            const pool = new sql.ConnectionPool(sqlConfig)
-            await pool.connect()
+        
+            const sqlPool = await sql.connect(sqlConfig)
+            for(let i=0; i<sqlStatements.length; i++) {
+                const r = sqlPool.request()
+                r.parameters = sqlStatements[i].parameters
+                await r.execute(sprocToExecute)
+            }
 
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. executing ${sprocToExecute} for ${sqlStatements.length}.. `)
-
-            for(let i=0; i<sqlStatements.length; i++) {
-                await sqlStatements[i].execute(sprocToExecute)
-            }
 
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
