@@ -5,9 +5,7 @@ import sql from 'mssql'
 
 export class ActiveDirectory
 {
-
-  public static sqlProcedure:string = 'sp_add_activeDirectory_device'
-
+  
   constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
     this._showDetails=showDetails;

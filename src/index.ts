@@ -58,6 +58,7 @@ export class Telemetry {
         return new Promise<boolean>((resolve) => {resolve(output)})
     }
 
+    public static sprocActiveDirectory:string = 'sp_add_activeDirectory_device'
     public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
         this._logstack.push('ActiveDirectory');
         let output:sql.Request[] = []
@@ -74,6 +75,7 @@ export class Telemetry {
         return new Promise<sql.Request[]>((resolve) => {resolve(output)})
     }
 
+    public static sprocAzureActiveDirectory:string = 'sp_add_device_azureActiveDirectory'
     public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
         this._logstack.push('AzureActiveDirectory');
         let output:sql.Request[] = []
