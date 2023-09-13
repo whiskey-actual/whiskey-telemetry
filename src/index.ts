@@ -1,16 +1,14 @@
 // external imports
 import { WhiskeyUtilities } from 'whiskey-utilities'
-import { Mongoose } from 'mongoose'
 
 // components
 import { SqlRequestCollection } from './database/SqlRequestCollection'
-import { MongoDatabase } from './database/MongoDatabase'
-import { MongoPersister } from './Persister'
 import { ConnectwiseDevice, CrowdstrikeDevice } from './Device'
 
 // collectors
 import { ActiveDirectory } from './collectors/ActiveDirectory'
 import { AzureActiveDirectory } from './collectors/AzureActiveDirectory'
+import { AzureManaged } from './collectors/AzureManaged'
 import { Connectwise } from './collectors/Connectwise'
 import { Crowdstrike } from './collectors/Crowdstrike'
 
@@ -22,21 +20,21 @@ export class Telemetry {
     }
     _logstack:string[]=[]
 
-    public async isMongoDatabaseOK(mongoAdminURI:string, mongoURI:string, db:string):Promise<boolean> {
-        this._logstack.push('isMongoDatabaseOK');
-        let output:boolean = false;
+    // public async isMongoDatabaseOK(mongoAdminURI:string, mongoURI:string, db:string):Promise<boolean> {
+    //     this._logstack.push('isMongoDatabaseOK');
+    //     let output:boolean = false;
 
-        try {
-            const d = new MongoDatabase(this._logstack);
-            output = await d.checkMongoDatabase(mongoAdminURI, mongoURI, db);
-        } catch(err) {
-            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
-            throw(err);
-        }
+    //     try {
+    //         const d = new MongoDatabase(this._logstack);
+    //         output = await d.checkMongoDatabase(mongoAdminURI, mongoURI, db);
+    //     } catch(err) {
+    //         WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
+    //         throw(err);
+    //     }
         
-        this._logstack.pop()
-        return new Promise<boolean>((resolve) => {resolve(output)})
-    }
+    //     this._logstack.pop()
+    //     return new Promise<boolean>((resolve) => {resolve(output)})
+    // }
 
     // public async persistToMongo(deviceObjects:any, logFrequency:number=1000, showDetails:boolean=false, showDebug:boolean=false) {
     //     this._logstack.push('persistToMongo');
@@ -77,6 +75,22 @@ export class Telemetry {
         try {
             const aad = new AzureActiveDirectory(this._logstack, showDetails, showDebug);
             output = await aad.fetch(TENANT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, CLIENT_ID, CLIENT_SECRET)
+        } catch(err) {
+            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
+            throw(err);
+        }
+        
+        this._logstack.pop()
+        return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
+    }
+
+    public async fetchAzureManaged(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
+        this._logstack.push('AzureManaged');
+        let output:SqlRequestCollection
+
+        try {
+            const am = new AzureManaged(this._logstack, showDetails, showDebug);
+            output = await am.fetch(TENANT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, CLIENT_ID, CLIENT_SECRET)
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
             throw(err);
