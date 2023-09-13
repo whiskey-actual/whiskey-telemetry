@@ -1,12 +1,10 @@
 import axios from "axios";
 import * as msal from '@azure/msal-node'
 import { WhiskeyUtilities } from "whiskey-utilities";
-import { AzureActiveDirectoryDevice } from '../Device'
+import { SqlRequestCollection } from "../database/SqlRequestCollection";
 import sql from 'mssql'
 
 export class AzureActiveDirectory {
-
-  public static sqlProcedure:string = 'sp_add_device_azureActiveDirectory'
 
   constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
@@ -18,26 +16,26 @@ export class AzureActiveDirectory {
   _showDebug:boolean=false;
   
 
-  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<sql.Request[]> {
+  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<SqlRequestCollection> {
     this._logStack.push('fetch')
+    let output:SqlRequestCollection
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
     const authResponse = await this.getToken(AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_ID, CLIENT_SECRET);
     const accessToken = authResponse.accessToken;
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
-    let output:Array<sql.Request> = []
+    
 
     output = await this.devices(GRAPH_ENDPOINT, accessToken);
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
-    return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+    return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
   }
 
-  private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<sql.Request[]> {
-
-    let output:Array<sql.Request> = []
+  private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<SqlRequestCollection> {
+    let output = new SqlRequestCollection('sp_add_device_azureActiveDirectory')
     this._logStack.push('devices')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching devices ..`)
 
@@ -46,49 +44,54 @@ export class AzureActiveDirectory {
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
 
     for(let i=0; i<deviceList.length; i++) {
-      const device:AzureActiveDirectoryDevice = {
-        deviceName: deviceList[i].displayName.toString(),
-        observedByAzureActiveDirectory: true,
-        azureDisplayName: deviceList[i].displayName.toString(),
-        azureId: deviceList[i].id,
-        azureDeviceCategory: deviceList[i].deviceCategory ? deviceList[i].deviceCategory.toString() : undefined,
-        azureDeviceId: deviceList[i].deviceId ? deviceList[i].deviceId.toString() : undefined,
-        azureDeviceMetadata: deviceList[i].deviceMetadata ? deviceList[i].deviceMetadata.toString() : undefined,
-        azureDeviceOwnership: deviceList[i].deviceOwnership ? deviceList[i].deviceOwnership.toString() : undefined,
-        azureDeviceVersion: deviceList[i].deviceVersion ? deviceList[i].deviceVersion.toString() : undefined,
-        azureDomainName: deviceList[i].domainName ? deviceList[i].domainName.toString() : undefined,
-        azureEnrollmentProfileType: deviceList[i].enrollmentProfileType ? deviceList[i].enrollmentProfileType.toString() : undefined,
-        azureEnrollmentType: deviceList[i].enrollmentType ? deviceList[i].enrollmentType.toString() : undefined,
-        azureExternalSourceName: deviceList[i].externalSourceName ? deviceList[i].externalSourceName.toString() : undefined,
-        azureManagementType: deviceList[i].managementType ? deviceList[i].managementType.toString() : undefined,
-        azureManufacturer: deviceList[i].manufacturer ? deviceList[i].manufacturer.toString() : undefined,
-        azureMDMAppId: deviceList[i].mdmAppId ? deviceList[i].mdmAppId.toString() : undefined,
-        azureModel: deviceList[i].model ? deviceList[i].model.toString() : undefined,
-        azureOperatingSystem: deviceList[i].operaingSystem ? deviceList[i].operaingSystem.toString() : undefined,
-        azureOperatingSystemVersion: deviceList[i].operatingSystemVersion ? deviceList[i].operatingSystemVersion.toString() : undefined,
-        azureProfileType: deviceList[i].profileType ? deviceList[i].profileType.toString() : undefined,
-        azureSourceType: deviceList[i].sourceType ? deviceList[i].sourceType.toString() : undefined,
-        azureTrustType: deviceList[i].trustType ? deviceList[i].trustType.toString() : undefined,
-        azureDeletedDateTime: new Date(deviceList[i].deletedDateTime),
-        azureApproximateLastSignInDateTime: new Date(deviceList[i].approximateLastSignInDateTime),
-        azureComplianceExpirationDateTime: new Date(deviceList[i].complianceExpirationDateTime),
-        azureCreatedDateTime: new Date(deviceList[i].createdDateTime),
-        azureOnPremisesLastSyncDateTime: new Date(deviceList[i].onPremisesLastSyncDateTime),
-        azureRegistrationDateTime: new Date(deviceList[i].registrationDateTime),
-        azureOnPremisesSyncEnabled: deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled : false,
-        azureAccountEnabled: deviceList[i].accountEnabled ? deviceList[i].accountEnabled : false,
-        azureIsCompliant: deviceList[i].isCompliant ? deviceList[i].isCompliant : false,
-        azureIsManaged: deviceList[i].isManaged ? deviceList[i].isManaged : false,
-        azureIsRooted: deviceList[i].isRooted ? deviceList[i].isRooted : false,
+
+      try {
+        let q = new sql.Request()
+        .input('deviceName', sql.VarChar(255), deviceList[i].displayName.toString())
+        .input('azureId', sql.VarChar(255), deviceList[i].displayName.toString())
+        .input('azureDeviceCategory', sql.VarChar(255), deviceList[i].deviceCategory ? deviceList[i].deviceCategory.toString() : undefined)
+        .input('azureDeviceId', sql.VarChar(255), deviceList[i].deviceId ? deviceList[i].deviceId.toString() : undefined)
+        .input('azureDeviceMetadata', sql.VarChar(255), deviceList[i].deviceMetadata ? deviceList[i].deviceMetadata.toString() : undefined)
+        .input('azureDeviceOwnership', sql.VarChar(255), deviceList[i].deviceOwnership ? deviceList[i].deviceOwnership.toString() : undefined)
+        .input('azureDeviceVersion', sql.VarChar(255), deviceList[i].deviceVersion ? deviceList[i].deviceVersion.toString() : undefined)
+        .input('azureDomainName', sql.VarChar(255), deviceList[i].domainName ? deviceList[i].domainName.toString() : undefined)
+        .input('azureEnrollmentProfileType', sql.VarChar(255), deviceList[i].enrollmentProfileType ? deviceList[i].enrollmentProfileType.toString() : undefined)
+        .input('azureEnrollmentType', sql.VarChar(255), deviceList[i].enrollmentType ? deviceList[i].enrollmentType.toString() : undefined)
+        .input('azureExternalSourceName', sql.VarChar(255), deviceList[i].externalSourceName ? deviceList[i].externalSourceName.toString() : undefined)
+        .input('azureManagementType', sql.VarChar(255), deviceList[i].managementType ? deviceList[i].managementType.toString() : undefined)
+        .input('azureManufacturer', sql.VarChar(255), deviceList[i].manufacturer ? deviceList[i].manufacturer.toString() : undefined)
+        .input('azureMDMAppId', sql.VarChar(255), deviceList[i].mdmAppId ? deviceList[i].mdmAppId.toString() : undefined)
+        .input('azureModel', sql.VarChar(255), deviceList[i].model ? deviceList[i].model.toString() : undefined)
+        .input('azureOperatingSystem', sql.VarChar(255), deviceList[i].operaingSystem ? deviceList[i].operaingSystem.toString() : undefined)
+        .input('azureOperatingSystemVersion', sql.VarChar(255), deviceList[i].operatingSystemVersion ? deviceList[i].operatingSystemVersion.toString() : undefined)
+        .input('azureProfileType', sql.VarChar(255), deviceList[i].profileType ? deviceList[i].profileType.toString() : undefined)
+        .input('azureSourceType', sql.VarChar(255), deviceList[i].sourceType ? deviceList[i].sourceType.toString() : undefined)
+        .input('azureTrustType', sql.VarChar(255), deviceList[i].trustType ? deviceList[i].trustType.toString() : undefined)
+        // dates
+        .input('azureDeletedDateTime', sql.DateTime2, new Date(deviceList[i].deletedDateTime))
+        .input('azureApproximateLastSignInDateTime', sql.DateTime2, new Date(deviceList[i].approximateLastSignInDateTime))
+        .input('azureComplianceExpirationDateTime', sql.DateTime2, new Date(deviceList[i].complianceExpirationDateTime))
+        .input('azureCreatedDateTime', sql.DateTime2, new Date(deviceList[i].createdDateTime))
+        .input('azureOnPremisesLastSyncDateTime', sql.DateTime2, new Date(deviceList[i].onPremisesLastSyncDateTime))
+        .input('azureRegistrationDateTime', sql.DateTime2, new Date(deviceList[i].registrationDateTime))
+        // booleans
+        .input('azureOnPremisesSyncEnabled', sql.Bit, deviceList[i].onPremisesSyncEnabled ? deviceList[i].onPremisesSyncEnabled : false)
+        .input('azureAccountEnabled', sql.Bit, deviceList[i].accountEnabled ? deviceList[i].accountEnabled : false)
+        .input('azureIsCompliant', sql.Bit, deviceList[i].isCompliant ? deviceList[i].isCompliant : false)
+        .input('azureIsManaged', sql.Bit, deviceList[i].isManaged ? deviceList[i].isManaged : false)
+        .input('azureIsRooted', sql.Bit, deviceList[i].isRooted ? deviceList[i].isRooted : false)
+        output.sqlRequests.push(q)
+        
       }
-
-      const sqlStatement:sql.Request = await this.generateSqlStatement(device)
-
-      output.push(sqlStatement)
+      catch(err) {
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)
+        this._logStack.pop()
+        throw(err)
+      }
     }
 
     this._logStack.pop()
-    return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+    return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
   }
 
   private async getToken(AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, TENANT_ID:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<msal.AuthenticationResult> {
@@ -166,61 +169,6 @@ export class AzureActiveDirectory {
     this._logStack.pop()
     return new Promise<any>((resolve) => {resolve(output)})
 
-  }
-
-  private async generateSqlStatement(device:AzureActiveDirectoryDevice):Promise<sql.Request> {
-    let output:sql.Request = new sql.Request()
-    this._logStack.push("generateSqlStatements");
-
-      try {
-        let q = new sql.Request()
-        .input('deviceName', sql.VarChar(255), device.azureDisplayName)
-        .input('azureId', sql.VarChar(255), device.azureId)
-        .input('azureDeviceCategory', sql.VarChar(255), device.azureDeviceCategory)
-        .input('azureDeviceId', sql.VarChar(255), device.azureDeviceId)
-        .input('azureDeviceMetadata', sql.VarChar(255), device.azureDeviceMetadata)
-        .input('azureDeviceOwnership', sql.VarChar(255), device.azureDeviceOwnership)
-        .input('azureDeviceVersion', sql.VarChar(255), device.azureDeviceVersion)
-        .input('azureDomainName', sql.VarChar(255), device.azureDomainName)
-        .input('azureEnrollmentProfileType', sql.VarChar(255), device.azureEnrollmentProfileType)
-        .input('azureEnrollmentType', sql.VarChar(255), device.azureEnrollmentType)
-        .input('azureExternalSourceName', sql.VarChar(255), device.azureExternalSourceName)
-        .input('azureManagementType', sql.VarChar(255), device.azureManagementType)
-        .input('azureManufacturer', sql.VarChar(255), device.azureManufacturer)
-        .input('azureMDMAppId', sql.VarChar(255), device.azureMDMAppId)
-        .input('azureModel', sql.VarChar(255), device.azureModel)
-        .input('azureOperatingSystem', sql.VarChar(255), device.azureOperatingSystem)
-        .input('azureOperatingSystemVersion', sql.VarChar(255), device.azureOperatingSystemVersion)
-        .input('azureProfileType', sql.VarChar(255), device.azureProfileType)
-        .input('azureSourceType', sql.VarChar(255), device.azureSourceType)
-        .input('azureTrustType', sql.VarChar(255), device.azureTrustType)
-        // dates
-        .input('azureDeletedDateTime', sql.DateTime2, device.azureDeletedDateTime)
-        .input('azureApproximateLastSignInDateTime', sql.DateTime2, device.azureApproximateLastSignInDateTime)
-        .input('azureComplianceExpirationDateTime', sql.DateTime2, device.azureComplianceExpirationDateTime)
-        .input('azureCreatedDateTime', sql.DateTime2, device.azureCreatedDateTime)
-        .input('azureOnPremisesLastSyncDateTime', sql.DateTime2, device.azureOnPremisesLastSyncDateTime)
-        .input('azureRegistrationDateTime', sql.DateTime2, device.azureRegistrationDateTime)
-        // booleans
-        .input('azureOnPremisesSyncEnabled', sql.Bit, device.azureOnPremisesSyncEnabled)
-        .input('azureAccountEnabled', sql.Bit, device.azureAccountEnabled)
-        .input('azureIsCompliant', sql.Bit, device.azureIsCompliant)
-        .input('azureIsManaged', sql.Bit, device.azureIsManaged)
-        .input('azureIsRooted', sql.Bit, device.azureIsRooted)
-        .execute('sp_add_device_azureActiveDirectory')
-        //console.debug(result)
-        
-      }
-      catch(err) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)
-        this._logStack.pop()
-        throw(err)
-      }
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `done.`)
-    
-    this._logStack.pop()
-    return new Promise<sql.Request>((resolve) => {resolve(output)})
   }
 
 }

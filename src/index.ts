@@ -4,9 +4,10 @@ import { Mongoose } from 'mongoose'
 import sql from 'mssql'
 
 // components
+import { SqlRequestCollection } from './database/SqlRequestCollection'
 import { MongoDatabase } from './database/MongoDatabase'
 import { MongoPersister } from './Persister'
-import { AzureActiveDirectoryDevice, ConnectwiseDevice, CrowdstrikeDevice } from './Device'
+import { ConnectwiseDevice, CrowdstrikeDevice } from './Device'
 import { MicrosoftSql } from './database/MicrosoftSql'
 
 // collectors
@@ -58,10 +59,9 @@ export class Telemetry {
         return new Promise<boolean>((resolve) => {resolve(output)})
     }
 
-    public static sprocActiveDirectory:string = 'sp_add_activeDirectory_device'
-    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
+    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
         this._logstack.push('ActiveDirectory');
-        let output:sql.Request[] = []
+        let output:SqlRequestCollection
 
         try {
             const ad = new ActiveDirectory(this._logstack, showDetails, showDebug);
@@ -72,13 +72,12 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+        return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
-    public static sprocAzureActiveDirectory:string = 'sp_add_device_azureActiveDirectory'
-    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
+    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
         this._logstack.push('AzureActiveDirectory');
-        let output:sql.Request[] = []
+        let output:SqlRequestCollection
 
         try {
             const aad = new AzureActiveDirectory(this._logstack, showDetails, showDebug);
@@ -89,7 +88,7 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+        return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
     public async fetchConnectwise(baseURL:string, clientId:string, userName:string, password:string, showDetails:boolean=false, showDebug:boolean=false):Promise<ConnectwiseDevice[]> {
