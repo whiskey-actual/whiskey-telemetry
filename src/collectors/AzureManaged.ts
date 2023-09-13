@@ -78,12 +78,12 @@ export class AzureManaged {
               .input('azureManagedFreeStorageSpaceInBytes', sql.BigInt, deviceList[i].freeStorageSpaceInBytes ? Number(deviceList[i].freeStorageSpaceInBytes) : undefined)
               .input('azureManagedPhysicalMemoryInBytes', sql.BigInt, deviceList[i].physicalMemoryInBytes ? Number(deviceList[i].physicalMemoryInBytes) : undefined)
               // datetime
-              .input('azureManagedEnrolledDateTime', sql.DateTime2, new Date(deviceList[i].enrolledDateTime))
-              .input('azureManagedLastSyncDateTime', sql.DateTime2, new Date(deviceList[i].lastSyncDateTime))
-              .input('azureManagedEASActivationDateTime', sql.DateTime2, new Date(deviceList[i].easActivationDateTime))
-              .input('azureManagedExchangeLastSuccessfulSyncDateTime', sql.DateTime2, new Date(deviceList[i].exchangeLastSuccessfulSyncDateTime))
-              .input('azureManagedComplianceGracePeriodExpirationDateTime', sql.DateTime2, new Date(deviceList[i].complianceGracePeriodExpirationDateTime))
-              .input('azureManagedManagementCertificateExpirationDateTime', sql.DateTime2, new Date(deviceList[i].managementCertificateExpirationDateTime))
+              .input('azureManagedEnrolledDateTime', sql.DateTime2, deviceList[i].enrolledDateTime ? new Date(deviceList[i].enrolledDateTime) : undefined) 
+              .input('azureManagedLastSyncDateTime', sql.DateTime2, deviceList[i].lastSyncDateTime ? new Date(deviceList[i].lastSyncDateTime) : undefined)
+              .input('azureManagedEASActivationDateTime', sql.DateTime2, deviceList[i].easActivationDateTime ? new Date(deviceList[i].easActivationDateTime) : undefined)
+              .input('azureManagedExchangeLastSuccessfulSyncDateTime', sql.DateTime2, deviceList[i].exchangeLastSuccessfulSyncDateTime ? new Date(deviceList[i].exchangeLastSuccessfulSyncDateTime) : undefined)
+              .input('azureManagedComplianceGracePeriodExpirationDateTime', sql.DateTime2, deviceList[i].complianceGracePeriodExpirationDateTime ? new Date(deviceList[i].complianceGracePeriodExpirationDateTime) : undefined)
+              .input('azureManagedManagementCertificateExpirationDateTime', sql.DateTime2, deviceList[i].managementCertificateExpirationDateTime ? new Date(deviceList[i].managementCertificateExpirationDateTime) : undefined)
               // bit
               .input('azureManagedIsEASActivated', sql.Bit, deviceList[i].easActivated)
               .input('azureManagedIsAzureADRegistered', sql.Bit, deviceList[i].azureADRegistered)
