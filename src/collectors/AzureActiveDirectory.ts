@@ -35,7 +35,7 @@ export class AzureActiveDirectory {
   }
 
   private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<SqlRequestCollection> {
-    let output = new SqlRequestCollection('sp_add_device_azureActiveDirectory')
+    let output = new SqlRequestCollection('sp_add_azureActiveDirectory_device')
     this._logStack.push('devices')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching devices ..`)
 
