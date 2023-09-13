@@ -85,10 +85,10 @@ export class AzureManaged {
               .input('azureManagedComplianceGracePeriodExpirationDateTime', sql.DateTime2, deviceList[i].complianceGracePeriodExpirationDateTime ? new Date(deviceList[i].complianceGracePeriodExpirationDateTime) : undefined)
               .input('azureManagedManagementCertificateExpirationDateTime', sql.DateTime2, deviceList[i].managementCertificateExpirationDateTime ? new Date(deviceList[i].managementCertificateExpirationDateTime) : undefined)
               // bit
-              .input('azureManagedIsEASActivated', sql.Bit, deviceList[i].easActivated)
-              .input('azureManagedIsAzureADRegistered', sql.Bit, deviceList[i].azureADRegistered)
-              .input('azureManagedIsSupervised', sql.Bit, deviceList[i].isSupervised)
-              .input('azureManagedIsEncrypted', sql.Bit, deviceList[i].isEncrypted)
+              .input('azureManagedIsEASActivated', sql.Bit, deviceList[i].easActivated ? deviceList[i].easActivated : false)
+              .input('azureManagedIsAzureADRegistered', sql.Bit, deviceList[i].azureADRegistered ? deviceList[i].azureADRegistered : false)
+              .input('azureManagedIsSupervised', sql.Bit, deviceList[i].isSupervised ? deviceList[i].isSupervised : false)
+              .input('azureManagedIsEncrypted', sql.Bit, deviceList[i].isEncrypted ? deviceList[i].isEncrypted : false)
               output.sqlRequests.push(q)
             }
             catch(err) {
