@@ -28,12 +28,12 @@ export class SqlRequestCollection {
                     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', i, this.sqlRequests.length, startDate, new Date()));
                   }
             }
-
-            
-
+            sqlPool.close()
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, logStack, `${err}`)
             throw(err)
+        } finally {
+            logStack.pop()
         }
     }
 }
