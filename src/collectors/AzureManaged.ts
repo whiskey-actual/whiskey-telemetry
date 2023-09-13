@@ -74,9 +74,9 @@ export class AzureManaged {
               .input('azureManagedNotes', sql.VarChar(255), deviceList[i].notes)
               .input('azureManagedEthernetMacAddress', sql.VarChar(255), deviceList[i].ethernetMacAddress)
               // bigint
-              .input('azureManagedTotalStorageSpaceInBytes', sql.BigInt, deviceList[i].totalStorageSpaceInBytes)
-              .input('azureManagedFreeStorageSpaceInBytes', sql.BigInt, deviceList[i].freeStorageSpaceInBytes)
-              .input('azureManagedPhysicalMemoryInBytes', sql.BigInt, deviceList[i].physicalMemoryInBytes)
+              .input('azureManagedTotalStorageSpaceInBytes', sql.BigInt, deviceList[i].totalStorageSpaceInBytes ? Number(deviceList[i].totalStorageSpaceInBytes) : undefined)
+              .input('azureManagedFreeStorageSpaceInBytes', sql.BigInt, deviceList[i].freeStorageSpaceInBytes ? Number(deviceList[i].freeStorageSpaceInBytes) : undefined)
+              .input('azureManagedPhysicalMemoryInBytes', sql.BigInt, deviceList[i].physicalMemoryInBytes ? Number(deviceList[i].physicalMemoryInBytes) : undefined)
               // datetime
               .input('azureManagedEnrolledDateTime', sql.DateTime2, new Date(deviceList[i].enrolledDateTime))
               .input('azureManagedLastSyncDateTime', sql.DateTime2, new Date(deviceList[i].lastSyncDateTime))
