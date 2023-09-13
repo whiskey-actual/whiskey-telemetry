@@ -25,7 +25,6 @@ export class AzureActiveDirectory {
     const authResponse = await this.getToken(AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_ID, CLIENT_SECRET);
     const accessToken = authResponse.accessToken;
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
-    
 
     output = await this.devices(GRAPH_ENDPOINT, accessToken);
 

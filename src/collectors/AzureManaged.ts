@@ -1,133 +1,121 @@
 import axios from "axios";
 import * as msal from '@azure/msal-node'
 import { WhiskeyUtilities } from "whiskey-utilities";
-import { AzureManagedDevice } from '../Device'
+import { SqlRequestCollection } from "../database/SqlRequestCollection";
+import sql from 'mssql'
 
 export class AzureManaged {
 
-  constructor(logStack:string[], TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string) {
+  constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
-    this._TENANT_ID=TENANT_ID
-    this._AAD_ENDPOINT=AAD_ENDPOINT
-    this._GRAPH_ENDPOINT=GRAPH_ENDPOINT
-    this._CLIENT_ID=CLIENT_ID
-    this._CLIENT_SECRET=CLIENT_SECRET
+    this._showDetails=showDetails;
+    this._showDebug=showDebug;
   }
+  private _logStack:string[]=[]
+  private _showDetails:boolean=false;
+  private _showDebug:boolean=false;
+  
 
-  _logStack:string[]=[]
-  _TENANT_ID:string=''
-  _AAD_ENDPOINT:string=''
-  _GRAPH_ENDPOINT:string=''
-  _CLIENT_ID:string=''
-  _CLIENT_SECRET:string=''
-
-  public async fetch():Promise<AzureManagedDevice[]> {
+  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<SqlRequestCollection> {
     this._logStack.push('fetch')
+    let output = new SqlRequestCollection("sp_add_AzureManaged_device")
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
-    const authResponse = await this.getToken();
-    const accessToken = authResponse.accessToken;
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
-    let output:Array<AzureManagedDevice> = []
-    output = await this.managedDevices(accessToken);
+      try {
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
+        const authResponse = await this.getToken(TENANT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, CLIENT_ID, CLIENT_SECRET);
+        const accessToken = authResponse.accessToken;
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token; fetching managed devices ..')
+        const deviceList = await this.getData(accessToken, `${GRAPH_ENDPOINT}/v1.0/deviceManagement/managedDevices`)
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
-    return new Promise<AzureManagedDevice[]>((resolve) => {resolve(output)})
-  }
-
-  public async managedDevices(accessToken:string):Promise<AzureManagedDevice[]> {
-
-    let output:Array<AzureManagedDevice> = []
-    this._logStack.push('managedDevices')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching managed devices ..`)
-
-    const deviceList = await this.getData(accessToken, `${this._GRAPH_ENDPOINT}/v1.0/deviceManagement/managedDevices`)
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
-
-    for(let i=0; i<deviceList.length; i++) {
-      const d:AzureManagedDevice = {
-        deviceName: deviceList[i].deviceName.toString(),
-        observedByAzureMDM: true,
-        azureManagedDeviceName: deviceList[i].azureManagedDeviceName,
-        azureManagedId: deviceList[i].id,
-        azureManagedUserId: deviceList[i].userId,
-        azureManagedManagedDeviceOwnerType: deviceList[i].managedDeviceOwnerType,
-        azureManagedOperatingSystem: deviceList[i].operatingSystem,
-        azureManagedComplianceState: deviceList[i].complianceState,
-        azureManagedJailBroken: deviceList[i].jailBroken,
-        azureManagedManagementAgent: deviceList[i].managementAgent,
-        azureManagedOperatingSystemVersion: deviceList[i].osVersion,
-        azureManagedEASDeviceID: deviceList[i].easDeviceId,
-        azureManagedDeviceEnrollmentType: deviceList[i].deviceEnrollmentType,
-        azureManagedActivationLockBypassCode: deviceList[i].activationLockBypassCode,
-        azureManagedEmailAddress: deviceList[i].emailAddress,
-        azureManagedAzureADDeviceID: deviceList[i].azureADDeviceID,
-        azureManagedDeviceRegistrationState: deviceList[i].deviceRegistrationState,
-        azureManagedDeviceCategoryDisplayName: deviceList[i].deviceCategoryDisplayName,
-        azureManagedExchangeAccessState: deviceList[i].exchangeAccessState,
-        azureManagedExchangeAccessStateReason: deviceList[i].accessStateReason,
-        azureManagedRemoteAssistanceSessionUrl: deviceList[i].remoteAssistanceSessionUrl,
-        azureManagedRemoteAssistanceErrorDetails: deviceList[i].remoteAssistanceErrorDetails,
-        azureManagedUserPrincipalName: deviceList[i].userPrincipalName,
-        azureManagedModel: deviceList[i].model,
-        azureManagedManufacturer: deviceList[i].manufacturer,
-        azureManagedIMEI: deviceList[i].imei,
-        azureManagedSerialNumber: deviceList[i].serialNumber,
-        azureManagedPhoneNumber: deviceList[i].phoneNumber,
-        azureManagedAndroidSecurityPatchLevel: deviceList[i].securityPatchLevel,
-        azureManagedUserDisplayName: deviceList[i].userDisplayName,
-        azureManagedConfigurationManagerClientEnabedFeatures: deviceList[i].configurationManagerClientEnabedFeatures,
-        azureManagedWiFiMACAddress: deviceList[i].wifiMacAddress,
-        azureManagedDeviceHealthAttestationState: deviceList[i].deviceHealthAttestationState,
-        azureManagedSubscriberCarrier: deviceList[i].subscriberCarrier,
-        azureManagedMEID: deviceList[i].meid,
-        azureManagedTotalStorageSpaceInBytes: deviceList[i].totalStorageSpaceInBytes,
-        azureManagedFreeStorageSpaceInBytes: deviceList[i].freeStorageSpaceInBytes,
-        azureManagedPartnerReportedThreatState: deviceList[i].partnerReportedThreatState,
-        azureManagedRequireUserEnrollmentApproval: deviceList[i].requireUserEnrollmentApproval,
-        azureManagedICCID: deviceList[i].iccid,
-        azureManagedUDID: deviceList[i].udid,
-        azureManagedNotes: deviceList[i].notes,
-        azureManagedEthernetMacAddress: deviceList[i].ethernetMacAddress,
-        azureManagedPhysicalMemoryInBytes: deviceList[i].physicalMemoryInBytes,
-
-        azureManagedEnrolledDateTime: new Date(deviceList[i].enrolledDateTime),
-        azureManagedLastSyncDateTime: new Date(deviceList[i].lastSyncDateTime),
-        azureManagedEASActivationDateTime: new Date(deviceList[i].easActivationDateTime),
-        azureManagedExchangeLastSuccessfulSyncDateTime: new Date(deviceList[i].exchangeLastSuccessfulSyncDateTime),
-        azureManagedComplianceGracePeriodExpirationDateTime: new Date(deviceList[i].complianceGracePeriodExpirationDateTime),
-        azureManagedManagementCertificateExpirationDateTime: new Date(deviceList[i].managementCertificateExpirationDateTime),
-        azureManagedIsEASActivated: deviceList[i].easActivated,
-        azureManagedIsAzureADRegistered: deviceList[i].azureADRegistered,
-        azureManagedIsSupervised: deviceList[i].isSupervised,
-        azureManagedIsEncrypted: deviceList[i].isEncrypted,
-        azureManagedManagedDeviceName: ""
+        
+        for(let i=0; i<deviceList.length; i++) {
+            try {
+            let q = new sql.Request()
+              .input('deviceName', sql.VarChar(255), deviceList[i].deviceName.toString())
+              .input('azureManagedDeviceName', sql.VarChar(255), deviceList[i].azureManagedDeviceName)
+              .input('azureManagedId', sql.VarChar(255), deviceList[i].id)
+              .input('azureManagedUserId', sql.VarChar(255), deviceList[i].userId)
+              .input('azureManagedManagedDeviceOwnerType', sql.VarChar(255), deviceList[i].managedDeviceOwnerType)
+              .input('azureManagedOperatingSystem', sql.VarChar(255), deviceList[i].operatingSystem)
+              .input('azureManagedComplianceState', sql.VarChar(255), deviceList[i].complianceState)
+              .input('azureManagedJailBroken', sql.VarChar(255), deviceList[i].jailBroken)
+              .input('azureManagedManagementAgent', sql.VarChar(255), deviceList[i].managementAgent)
+              .input('azureManagedOperatingSystemVersion', sql.VarChar(255), deviceList[i].osVersion)
+              .input('azureManagedEASDeviceID', sql.VarChar(255), deviceList[i].easDeviceId)
+              .input('azureManagedDeviceEnrollmentType', sql.VarChar(255), deviceList[i].deviceEnrollmentType)
+              .input('azureManagedActivationLockBypassCode', sql.VarChar(255), deviceList[i].activationLockBypassCode)
+              .input('azureManagedEmailAddress', sql.VarChar(255), deviceList[i].emailAddress)
+              .input('azureManagedAzureADDeviceID', sql.VarChar(255), deviceList[i].azureADDeviceID)
+              .input('azureManagedDeviceRegistrationState', sql.VarChar(255), deviceList[i].deviceRegistrationState)
+              .input('azureManagedDeviceCategoryDisplayName', sql.VarChar(255), deviceList[i].deviceCategoryDisplayName)
+              .input('azureManagedExchangeAccessState', sql.VarChar(255), deviceList[i].exchangeAccessState)
+              .input('azureManagedExchangeAccessStateReason', sql.VarChar(255), deviceList[i].accessStateReason)
+              .input('azureManagedRemoteAssistanceSessionUrl', sql.VarChar(255), deviceList[i].remoteAssistanceSessionUrl)
+              .input('azureManagedRemoteAssistanceErrorDetails', sql.VarChar(255), deviceList[i].remoteAssistanceErrorDetails)
+              .input('azureManagedUserPrincipalName', sql.VarChar(255), deviceList[i].userPrincipalName)
+              .input('azureManagedModel', sql.VarChar(255), deviceList[i].model)
+              .input('azureManagedManufacturer', sql.VarChar(255), deviceList[i].manufacturer)
+              .input('azureManagedIMEI', sql.VarChar(255), deviceList[i].imei)
+              .input('azureManagedSerialNumber', sql.VarChar(255), deviceList[i].serialNumber)
+              .input('azureManagedPhoneNumber', sql.VarChar(255), deviceList[i].phoneNumber)
+              .input('azureManagedAndroidSecurityPatchLevel', sql.VarChar(255), deviceList[i].securityPatchLevel)
+              .input('azureManagedUserDisplayName', sql.VarChar(255), deviceList[i].userDisplayName)
+              .input('azureManagedConfigurationManagerClientEnabedFeatures', sql.VarChar(255), deviceList[i].configurationManagerClientEnabedFeatures)
+              .input('azureManagedWiFiMACAddress', sql.VarChar(255), deviceList[i].wifiMacAddress)
+              .input('azureManagedDeviceHealthAttestationState', sql.VarChar(255), deviceList[i].deviceHealthAttestationState)
+              .input('azureManagedSubscriberCarrier', sql.VarChar(255), deviceList[i].subscriberCarrier)
+              .input('azureManagedMEID', sql.VarChar(255), deviceList[i].meid)
+              .input('azureManagedTotalStorageSpaceInBytes', sql.VarChar(255), deviceList[i].totalStorageSpaceInBytes)
+              .input('azureManagedFreeStorageSpaceInBytes', sql.VarChar(255), deviceList[i].freeStorageSpaceInBytes)
+              .input('azureManagedPartnerReportedThreatState', sql.VarChar(255), deviceList[i].partnerReportedThreatState)
+              .input('azureManagedRequireUserEnrollmentApproval', sql.VarChar(255), deviceList[i].requireUserEnrollmentApproval)
+              .input('azureManagedICCID', sql.VarChar(255), deviceList[i].iccid)
+              .input('azureManagedUDID', sql.VarChar(255), deviceList[i].udid)
+              .input('azureManagedNotes', sql.VarChar(255), deviceList[i].notes)
+              .input('azureManagedEthernetMacAddress', sql.VarChar(255), deviceList[i].ethernetMacAddress)
+              .input('azureManagedPhysicalMemoryInBytes', sql.VarChar(255), deviceList[i].physicalMemoryInBytes)
+              // datetime
+              .input('azureManagedEnrolledDateTime', sql.DateTime2, new Date(deviceList[i].enrolledDateTime))
+              .input('azureManagedLastSyncDateTime', sql.DateTime2, new Date(deviceList[i].lastSyncDateTime))
+              .input('azureManagedEASActivationDateTime', sql.DateTime2, new Date(deviceList[i].easActivationDateTime))
+              .input('azureManagedExchangeLastSuccessfulSyncDateTime', sql.DateTime2, new Date(deviceList[i].exchangeLastSuccessfulSyncDateTime))
+              .input('azureManagedComplianceGracePeriodExpirationDateTime', sql.DateTime2, new Date(deviceList[i].complianceGracePeriodExpirationDateTime))
+              .input('azureManagedManagementCertificateExpirationDateTime', sql.DateTime2, new Date(deviceList[i].managementCertificateExpirationDateTime))
+              // bit
+              .input('azureManagedIsEASActivated', sql.Bit, deviceList[i].easActivated)
+              .input('azureManagedIsAzureADRegistered', sql.Bit, deviceList[i].azureADRegistered)
+              .input('azureManagedIsSupervised', sql.Bit, deviceList[i].isSupervised)
+              .input('azureManagedIsEncrypted', sql.Bit, deviceList[i].isEncrypted)
+              output.sqlRequests.push(q)
+            }
+            catch(err) {
+              WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
+            }
+        }
+      } catch(err) {
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
+        throw(err)
+      } finally {
+        this._logStack.pop()
       }
-
-
-
-      output.push(d)
-    }
-
-    this._logStack.pop()
-    return new Promise<AzureManagedDevice[]>((resolve) => {resolve(output)})
+    
+    return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
 
   }
 
-  private async getToken():Promise<msal.AuthenticationResult> {
+  private async getToken(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<msal.AuthenticationResult> {
 
     const msalConfig:msal.Configuration = {
       auth: {
-        clientId: this._CLIENT_ID,
-        authority: `${this._AAD_ENDPOINT}/${this._TENANT_ID}`,
-        clientSecret: this._CLIENT_SECRET
+        clientId: CLIENT_ID,
+        authority: `${AAD_ENDPOINT}/${TENANT_ID}`,
+        clientSecret: CLIENT_SECRET
       }
     }
 
-    const tokenRequest:msal.ClientCredentialRequest = { scopes: [`${this._GRAPH_ENDPOINT}/.default`]}
+    const tokenRequest:msal.ClientCredentialRequest = { scopes: [`${GRAPH_ENDPOINT}/.default`]}
 
     const cca:msal.ConfidentialClientApplication = new msal.ConfidentialClientApplication(msalConfig);
 
