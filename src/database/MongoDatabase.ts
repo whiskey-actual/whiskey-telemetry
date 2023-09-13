@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb'
 import mongoose, { mongo } from "mongoose";
 import { WhiskeyUtilities } from "whiskey-utilities";
-import { DeviceSchema } from './Device'
+import { DeviceSchema } from '../Device'
 
 
 export class MongoDatabase {

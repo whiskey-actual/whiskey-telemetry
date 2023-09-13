@@ -6,6 +6,8 @@ import sql from 'mssql'
 export class ActiveDirectory
 {
 
+  public static sqlProcedure:string = 'sp_add_activeDirectory_device'
+
   constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
     this._showDetails=showDetails;
@@ -16,9 +18,9 @@ export class ActiveDirectory
   _showDebug:boolean=false;
   
 
-  public async fetch(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<ActiveDirectoryDevice[]> {
+  public async fetch(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<sql.Request[]> {
 
-    let output:Array<ActiveDirectoryDevice> = []
+    let output:Array<sql.Request> = []
     this._logStack.push('fetch')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, 'initializing ..')
 
@@ -56,7 +58,7 @@ export class ActiveDirectory
           deviceName: searchEntries[i].cn.toString(),
           observedByActiveDirectory: true,
           activeDirectoryDN: searchEntries[i].dn.toString(),
-          activeDirectoryOperatingSystem: searchEntries[i].operatingSystem? searchEntries[i].operatingSystem.toString() : undefined,
+          activeDirectoryOperatingSystem: searchEntries[i].operatingSystem ? searchEntries[i].operatingSystem.toString() : undefined,
           activeDirectoryOperatingSystemVersion: searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined,
           activeDirectoryDNSHostName: searchEntries[i].dNSHostName ? searchEntries[i].dNSHostName.toString(): undefined,
           activeDirectoryLogonCount: isNaN(Number(searchEntries[i].logonCount)) ? 0 : Number(searchEntries[i].logonCount),
@@ -67,7 +69,9 @@ export class ActiveDirectory
           activeDirectoryLastLogonTimestamp: searchEntries[i].lastLogonTimestamp ? this.ldapTimestampToJS(searchEntries[i].lastLogonTimestamp.toString()) : undefined
         }
 
-        output.push(device)
+        const sqlStatement:sql.Request = await this.generateSqlStatement(device)
+
+        output.push(sqlStatement)
         //WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, 'queryActiveDirectory', `${device.activeDirectoryName} (${device.activeDirectoryOperatingSystem})`)
       }
     } catch (ex) {
@@ -79,47 +83,38 @@ export class ActiveDirectory
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
-    return new Promise<ActiveDirectoryDevice[]>((resolve) => {resolve(output)})
+    return new Promise<sql.Request[]>((resolve) => {resolve(output)})
 
   }
 
-  public async persist(sqlConfig:any, devices:ActiveDirectoryDevice[]):Promise<Boolean> {
+  private async generateSqlStatement(device:ActiveDirectoryDevice):Promise<sql.Request> {
+    let output:sql.Request = new sql.Request()
 
-    this._logStack.push("persist");
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${devices.length} devices ..`)
+    this._logStack.push("generateSqlStatements");
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
-    let pool = await sql.connect(sqlConfig)
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, persisting devices .. `)
-
-    for(let i=0; i<devices.length; i++) {
       try {
-        const result = await pool.request()
-        .input('deviceName', sql.VarChar(64), devices[i].deviceName)
-        .input('activeDirectoryDN', sql.VarChar(255), devices[i].activeDirectoryDN)
-        .input('activeDirectoryOperatingSystem', sql.VarChar(255), devices[i].activeDirectoryOperatingSystem)
-        .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), devices[i].activeDirectoryOperatingSystemVersion)
-        .input('activeDirectoryDNSHostName', sql.VarChar(255), devices[i].activeDirectoryDNSHostName)
-        .input('activeDirectoryLogonCount', sql.Int, devices[i].activeDirectoryLogonCount)
-        .input('activeDirectoryWhenCreated', sql.DateTime2, devices[i].activeDirectoryWhenCreated)
-        .input('activeDirectoryWhenChanged', sql.DateTime2, devices[i].activeDirectoryWhenChanged)
-        .input('activeDirectoryLastLogon', sql.DateTime2, devices[i].activeDirectoryLastLogon)
-        .input('activeDirectoryPwdLastSet', sql.DateTime2, devices[i].activeDirectoryPwdLastSet)
-        .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, devices[i].activeDirectoryLastLogonTimestamp)
-        .execute('sp_add_device_activeDirectory')
-        //console.debug(result)        
+        let q = new sql.Request()
+        .input('deviceName', sql.VarChar(64), device.deviceName)
+        .input('activeDirectoryDN', sql.VarChar(255), device.activeDirectoryDN)
+        .input('activeDirectoryOperatingSystem', sql.VarChar(255), device.activeDirectoryOperatingSystem)
+        .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), device.activeDirectoryOperatingSystemVersion)
+        .input('activeDirectoryDNSHostName', sql.VarChar(255), device.activeDirectoryDNSHostName)
+        .input('activeDirectoryLogonCount', sql.Int, device.activeDirectoryLogonCount)
+        .input('activeDirectoryWhenCreated', sql.DateTime2, device.activeDirectoryWhenCreated)
+        .input('activeDirectoryWhenChanged', sql.DateTime2, device.activeDirectoryWhenChanged)
+        .input('activeDirectoryLastLogon', sql.DateTime2, device.activeDirectoryLastLogon)
+        .input('activeDirectoryPwdLastSet', sql.DateTime2, device.activeDirectoryPwdLastSet)
+        .input('activeDirectoryLastLogonTimestamp', sql.DateTime2, device.activeDirectoryLastLogonTimestamp)
+        output = q
       }
       catch(err) {
         WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)
         this._logStack.pop()
         throw(err)
       }
-    }
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `done.`)
     
     this._logStack.pop()
-    return new Promise<Boolean>((resolve) => {resolve(true)})
+    return new Promise<sql.Request>((resolve) => {resolve(output)})
   }
 
   private ldapTimestampToJS(timestamp:string):Date {

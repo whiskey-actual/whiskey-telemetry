@@ -10,7 +10,7 @@ export interface ActiveDirectoryDevice {
   observedByActiveDirectory: boolean,
   // strings
   activeDirectoryDN: string,
-  activeDirectoryOperatingSystem?: string|undefined,
+  activeDirectoryOperatingSystem: string|undefined,
   activeDirectoryOperatingSystemVersion: string|undefined,
   activeDirectoryDNSHostName: string|undefined,
   // numbers

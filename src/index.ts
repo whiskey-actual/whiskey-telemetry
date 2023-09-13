@@ -1,11 +1,13 @@
 // external imports
 import { WhiskeyUtilities } from 'whiskey-utilities'
 import { Mongoose } from 'mongoose'
+import sql from 'mssql'
 
 // components
-import { MongoDatabase } from './Database'
+import { MongoDatabase } from './database/MongoDatabase'
 import { MongoPersister } from './Persister'
-import { ActiveDirectoryDevice, AzureActiveDirectoryDevice, ConnectwiseDevice, CrowdstrikeDevice } from './Device'
+import { AzureActiveDirectoryDevice, ConnectwiseDevice, CrowdstrikeDevice } from './Device'
+import { MicrosoftSql } from './database/MicrosoftSql'
 
 // collectors
 import { ActiveDirectory } from './collectors/ActiveDirectory'
@@ -56,9 +58,9 @@ export class Telemetry {
         return new Promise<boolean>((resolve) => {resolve(output)})
     }
 
-    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<ActiveDirectoryDevice[]> {
+    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
         this._logstack.push('ActiveDirectory');
-        let output:ActiveDirectoryDevice[] = []
+        let output:sql.Request[] = []
 
         try {
             const ad = new ActiveDirectory(this._logstack, showDetails, showDebug);
@@ -69,12 +71,12 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<ActiveDirectoryDevice[]>((resolve) => {resolve(output)})
+        return new Promise<sql.Request[]>((resolve) => {resolve(output)})
     }
 
-    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<AzureActiveDirectoryDevice[]> {
+    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<sql.Request[]> {
         this._logstack.push('AzureActiveDirectory');
-        let output:AzureActiveDirectoryDevice[] = []
+        let output:sql.Request[] = []
 
         try {
             const aad = new AzureActiveDirectory(this._logstack, showDetails, showDebug);
@@ -85,7 +87,7 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
+        return new Promise<sql.Request[]>((resolve) => {resolve(output)})
     }
 
     public async fetchConnectwise(baseURL:string, clientId:string, userName:string, password:string, showDetails:boolean=false, showDebug:boolean=false):Promise<ConnectwiseDevice[]> {
@@ -118,6 +120,22 @@ export class Telemetry {
         
         this._logstack.pop()
         return new Promise<CrowdstrikeDevice[]>((resolve) => {resolve(output)})
+    }
+
+    public async persistToMicrosoftSql(sqlConfig:any, sqlStatements:sql.Request[], sprocToExecute:string) {
+        this._logstack.push('persistToMicrosoftSql');
+        let output:boolean = false;
+
+        try {
+            const mssql = new MicrosoftSql(this._logstack)
+            await mssql.persistToMicrosoftSql(sqlConfig, sqlStatements, sprocToExecute)
+        } catch(err) {
+            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
+            throw(err);
+        }
+        
+        this._logstack.pop()
+        return new Promise<boolean>((resolve) => {resolve(output)})
     }
 
 

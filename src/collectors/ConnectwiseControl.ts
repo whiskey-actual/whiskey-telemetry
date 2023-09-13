@@ -4,9 +4,7 @@ import { WhiskeyUtilities } from "whiskey-utilities";
 import { AzureActiveDirectoryDevice } from '../Device'
 import sql from 'mssql'
 
-export class AzureActiveDirectory {
-
-  public static sqlProcedure:string = 'sp_add_device_azureActiveDirectory'
+export class ConnectwiseControl {
 
   constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
     this._logStack=logStack;
@@ -18,7 +16,7 @@ export class AzureActiveDirectory {
   _showDebug:boolean=false;
   
 
-  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<sql.Request[]> {
+  public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<AzureActiveDirectoryDevice[]> {
     this._logStack.push('fetch')
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
@@ -26,18 +24,18 @@ export class AzureActiveDirectory {
     const authResponse = await this.getToken(AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_ID, CLIENT_SECRET);
     const accessToken = authResponse.accessToken;
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
-    let output:Array<sql.Request> = []
+    let output:Array<AzureActiveDirectoryDevice> = []
 
     output = await this.devices(GRAPH_ENDPOINT, accessToken);
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
     this._logStack.pop()
-    return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+    return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }
 
-  private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<sql.Request[]> {
+  private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<AzureActiveDirectoryDevice[]> {
 
-    let output:Array<sql.Request> = []
+    let output:Array<AzureActiveDirectoryDevice> = []
     this._logStack.push('devices')
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching devices ..`)
 
@@ -46,7 +44,7 @@ export class AzureActiveDirectory {
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
 
     for(let i=0; i<deviceList.length; i++) {
-      const device:AzureActiveDirectoryDevice = {
+      const d:AzureActiveDirectoryDevice = {
         deviceName: deviceList[i].displayName.toString(),
         observedByAzureActiveDirectory: true,
         azureDisplayName: deviceList[i].displayName.toString(),
@@ -82,13 +80,11 @@ export class AzureActiveDirectory {
         azureIsRooted: deviceList[i].isRooted ? deviceList[i].isRooted : false,
       }
 
-      const sqlStatement:sql.Request = await this.generateSqlStatement(device)
-
-      output.push(sqlStatement)
+      output.push(d)
     }
 
     this._logStack.pop()
-    return new Promise<sql.Request[]>((resolve) => {resolve(output)})
+    return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }
 
   private async getToken(AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, TENANT_ID:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<msal.AuthenticationResult> {
@@ -168,45 +164,51 @@ export class AzureActiveDirectory {
 
   }
 
-  private async generateSqlStatement(device:AzureActiveDirectoryDevice):Promise<sql.Request> {
-    let output:sql.Request = new sql.Request()
-    this._logStack.push("generateSqlStatements");
+  public async persist(sqlConfig:any, devices:AzureActiveDirectoryDevice[]):Promise<Boolean> {
 
+    this._logStack.push("persist");
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${devices.length} devices ..`)
+
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
+    let pool = await sql.connect(sqlConfig)
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, persisting devices .. `)
+
+    for(let i=0; i<devices.length; i++) {
       try {
-        let q = new sql.Request()
-        .input('deviceName', sql.VarChar(255), device.azureDisplayName)
-        .input('azureId', sql.VarChar(255), device.azureId)
-        .input('azureDeviceCategory', sql.VarChar(255), device.azureDeviceCategory)
-        .input('azureDeviceId', sql.VarChar(255), device.azureDeviceId)
-        .input('azureDeviceMetadata', sql.VarChar(255), device.azureDeviceMetadata)
-        .input('azureDeviceOwnership', sql.VarChar(255), device.azureDeviceOwnership)
-        .input('azureDeviceVersion', sql.VarChar(255), device.azureDeviceVersion)
-        .input('azureDomainName', sql.VarChar(255), device.azureDomainName)
-        .input('azureEnrollmentProfileType', sql.VarChar(255), device.azureEnrollmentProfileType)
-        .input('azureEnrollmentType', sql.VarChar(255), device.azureEnrollmentType)
-        .input('azureExternalSourceName', sql.VarChar(255), device.azureExternalSourceName)
-        .input('azureManagementType', sql.VarChar(255), device.azureManagementType)
-        .input('azureManufacturer', sql.VarChar(255), device.azureManufacturer)
-        .input('azureMDMAppId', sql.VarChar(255), device.azureMDMAppId)
-        .input('azureModel', sql.VarChar(255), device.azureModel)
-        .input('azureOperatingSystem', sql.VarChar(255), device.azureOperatingSystem)
-        .input('azureOperatingSystemVersion', sql.VarChar(255), device.azureOperatingSystemVersion)
-        .input('azureProfileType', sql.VarChar(255), device.azureProfileType)
-        .input('azureSourceType', sql.VarChar(255), device.azureSourceType)
-        .input('azureTrustType', sql.VarChar(255), device.azureTrustType)
+        const result = await pool.request()
+        .input('deviceName', sql.VarChar(255), devices[i].azureDisplayName)
+        .input('azureId', sql.VarChar(255), devices[i].azureId)
+        .input('azureDeviceCategory', sql.VarChar(255), devices[i].azureDeviceCategory)
+        .input('azureDeviceId', sql.VarChar(255), devices[i].azureDeviceId)
+        .input('azureDeviceMetadata', sql.VarChar(255), devices[i].azureDeviceMetadata)
+        .input('azureDeviceOwnership', sql.VarChar(255), devices[i].azureDeviceOwnership)
+        .input('azureDeviceVersion', sql.VarChar(255), devices[i].azureDeviceVersion)
+        .input('azureDomainName', sql.VarChar(255), devices[i].azureDomainName)
+        .input('azureEnrollmentProfileType', sql.VarChar(255), devices[i].azureEnrollmentProfileType)
+        .input('azureEnrollmentType', sql.VarChar(255), devices[i].azureEnrollmentType)
+        .input('azureExternalSourceName', sql.VarChar(255), devices[i].azureExternalSourceName)
+        .input('azureManagementType', sql.VarChar(255), devices[i].azureManagementType)
+        .input('azureManufacturer', sql.VarChar(255), devices[i].azureManufacturer)
+        .input('azureMDMAppId', sql.VarChar(255), devices[i].azureMDMAppId)
+        .input('azureModel', sql.VarChar(255), devices[i].azureModel)
+        .input('azureOperatingSystem', sql.VarChar(255), devices[i].azureOperatingSystem)
+        .input('azureOperatingSystemVersion', sql.VarChar(255), devices[i].azureOperatingSystemVersion)
+        .input('azureProfileType', sql.VarChar(255), devices[i].azureProfileType)
+        .input('azureSourceType', sql.VarChar(255), devices[i].azureSourceType)
+        .input('azureTrustType', sql.VarChar(255), devices[i].azureTrustType)
         // dates
-        .input('azureDeletedDateTime', sql.DateTime2, device.azureDeletedDateTime)
-        .input('azureApproximateLastSignInDateTime', sql.DateTime2, device.azureApproximateLastSignInDateTime)
-        .input('azureComplianceExpirationDateTime', sql.DateTime2, device.azureComplianceExpirationDateTime)
-        .input('azureCreatedDateTime', sql.DateTime2, device.azureCreatedDateTime)
-        .input('azureOnPremisesLastSyncDateTime', sql.DateTime2, device.azureOnPremisesLastSyncDateTime)
-        .input('azureRegistrationDateTime', sql.DateTime2, device.azureRegistrationDateTime)
+        .input('azureDeletedDateTime', sql.DateTime2, devices[i].azureDeletedDateTime)
+        .input('azureApproximateLastSignInDateTime', sql.DateTime2, devices[i].azureApproximateLastSignInDateTime)
+        .input('azureComplianceExpirationDateTime', sql.DateTime2, devices[i].azureComplianceExpirationDateTime)
+        .input('azureCreatedDateTime', sql.DateTime2, devices[i].azureCreatedDateTime)
+        .input('azureOnPremisesLastSyncDateTime', sql.DateTime2, devices[i].azureOnPremisesLastSyncDateTime)
+        .input('azureRegistrationDateTime', sql.DateTime2, devices[i].azureRegistrationDateTime)
         // booleans
-        .input('azureOnPremisesSyncEnabled', sql.Bit, device.azureOnPremisesSyncEnabled)
-        .input('azureAccountEnabled', sql.Bit, device.azureAccountEnabled)
-        .input('azureIsCompliant', sql.Bit, device.azureIsCompliant)
-        .input('azureIsManaged', sql.Bit, device.azureIsManaged)
-        .input('azureIsRooted', sql.Bit, device.azureIsRooted)
+        .input('azureOnPremisesSyncEnabled', sql.Bit, devices[i].azureOnPremisesSyncEnabled)
+        .input('azureAccountEnabled', sql.Bit, devices[i].azureAccountEnabled)
+        .input('azureIsCompliant', sql.Bit, devices[i].azureIsCompliant)
+        .input('azureIsManaged', sql.Bit, devices[i].azureIsManaged)
+        .input('azureIsRooted', sql.Bit, devices[i].azureIsRooted)
         .execute('sp_add_device_azureActiveDirectory')
         //console.debug(result)
         
@@ -216,11 +218,12 @@ export class AzureActiveDirectory {
         this._logStack.pop()
         throw(err)
       }
+    }
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `done.`)
     
     this._logStack.pop()
-    return new Promise<sql.Request>((resolve) => {resolve(output)})
+    return new Promise<Boolean>((resolve) => {resolve(true)})
   }
 
 }
