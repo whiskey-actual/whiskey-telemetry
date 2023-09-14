@@ -43,7 +43,7 @@ export class MicrosoftSql {
         //await Promise.all(executionArray);
 
         await this.executePromisesWithProgress(executionArray, (p:number)=>{
-            if(p>0 && p%logFrequency==0) {
+            if(p>0 && p%logFrequency===0) {
                 WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', p, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
             }
         })
@@ -72,7 +72,6 @@ export class MicrosoftSql {
             })
             .catch((err:string) => {
                 WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
-                console.debug(promise)
             })
             
             

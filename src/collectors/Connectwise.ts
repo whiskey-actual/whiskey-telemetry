@@ -69,6 +69,7 @@ export class Connectwise
           .input('connectwiseAntivirusDefinitionDate', sql.DateTime2, computers[i].AntivirusDefinitionDate ? new Date(computers[i].AntivirusDefinitionDate) : undefined)
           .input('connectwiseFirstSeen', sql.DateTime2, new Date(computers[i].DateAdded))
           output.sqlRequests.push(q)
+          console.debug(`${computers[i].ComputerName.toString()}: ${computers[i].WindowsUpdateDate}`)
         }  catch(err) {
           WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
         }
