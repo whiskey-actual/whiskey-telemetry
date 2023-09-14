@@ -31,7 +31,8 @@ export class MicrosoftSql {
             for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
                 const r = sqlPool.request()
                 try {
-                    executionArray.push(r.execute(sqlRequestCollection.sprocName))
+                    //executionArray.push(r.execute(sqlRequestCollection.sprocName))
+                    await r.execute(sqlRequestCollection.sprocName)
                 } catch(err) {
                     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
                     console.debug(sqlRequestCollection.sqlRequests[i])
@@ -41,7 +42,7 @@ export class MicrosoftSql {
                     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'queued', i, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
                 }
             }
-            await Promise.all(executionArray);
+            //await Promise.all(executionArray);
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', sqlRequestCollection.sqlRequests.length, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
             sqlPool.close()
         } catch(err) {
