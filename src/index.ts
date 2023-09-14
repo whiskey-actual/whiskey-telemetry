@@ -25,7 +25,7 @@ export class Telemetry {
     private _showDetails:boolean=false
     private _showDebug:boolean=false
 
-    public async persistToMicrosoftSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=250) {
+    public async persistToMicrosoftSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
         await this._mssql.writeToSql(sqlRequestCollection, logFrequency)
     }
 

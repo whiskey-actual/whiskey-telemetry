@@ -15,7 +15,7 @@ export class MicrosoftSql {
     private _showDebug:boolean=false;
     private _sqlConfig:any=undefined
 
-    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
+    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number) {
     this._logStack.push("writeToSql");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
 
@@ -37,6 +37,7 @@ export class MicrosoftSql {
                     r
                     .execute(sqlRequestCollection.sprocName)
                     .catch((reason:any) =>{
+                        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${reason}`)
                         console.debug(r)
                     })
                 )
@@ -49,11 +50,7 @@ export class MicrosoftSql {
         }
         //await Promise.all(executionArray);
 
-        await this.executePromisesWithProgress(executionArray, (p:number)=>{
-            if(p>0 && p%logFrequency===0) {
-                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', p, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
-            }
-        })
+        await WhiskeyUtilities.executePromisesWithProgress(executionArray, this._logStack)
 
         
         sqlPool.close()
@@ -67,23 +64,6 @@ export class MicrosoftSql {
      
     }
 
-    private executePromisesWithProgress(promises:Promise<void|IProcedureResult<any>>[], progressCallback:any) {
-        let d:number=0
-        progressCallback(0);
-
-        for(const promise of promises) {
-            promise
-            .then(() => {
-                d++;
-                progressCallback(d)
-            })
-            .catch((err: any) => {
-                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
-            })
-            
-            
-        }
-        return Promise.all(promises);
-    }
+    
 
 }
