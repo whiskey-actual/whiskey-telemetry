@@ -9,49 +9,68 @@ export class MicrosoftSql {
         this._sqlConfig = sqlConfig;
         this._showDetails=showDetails;
         this._showDebug=showDebug;
-      }
-      private _logStack:string[]=[]
-      private _showDetails:boolean=false;
-      private _showDebug:boolean=false;
-      private _sqlConfig:any=undefined
+    }
+    private _logStack:string[]=[]
+    private _showDetails:boolean=false;
+    private _showDebug:boolean=false;
+    private _sqlConfig:any=undefined
 
-      public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=250) {
-        this._logStack.push("writeToSql");
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
+    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=250) {
+    this._logStack.push("writeToSql");
+    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
 
-        try {
+    try {
 
-            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${this._sqlConfig.server} ..`)
-            const sqlPool = await mssql.connect(this._sqlConfig)
-            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected; executing ${sqlRequestCollection.sprocName} for ${sqlRequestCollection.sqlRequests.length} items .. `)
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${this._sqlConfig.server} ..`)
+        const sqlPool = await mssql.connect(this._sqlConfig)
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected; executing ${sqlRequestCollection.sprocName} for ${sqlRequestCollection.sqlRequests.length} items .. `)
 
-            let executionArray = []
+        let executionArray = []
 
-            const startDate:Date = new Date()
-            for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
-                const r = sqlPool.request()
-                try {
-                    r.parameters = sqlRequestCollection.sqlRequests[i].parameters
-                    executionArray.push(r.execute(sqlRequestCollection.sprocName))
-                    //await r.execute(sqlRequestCollection.sprocName)
-                } catch(err) {
-                    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
-                    console.debug(sqlRequestCollection.sqlRequests[i])
-                }
-                
-                if(i>0 && i%logFrequency==0) {
-                    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'queued', i, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
-                }
+        const startDate:Date = new Date()
+        for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
+            const r = sqlPool.request()
+            try {
+                r.parameters = sqlRequestCollection.sqlRequests[i].parameters
+                executionArray.push(r.execute(sqlRequestCollection.sprocName))
+                //await r.execute(sqlRequestCollection.sprocName)
+            } catch(err) {
+                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+                console.debug(sqlRequestCollection.sqlRequests[i])
             }
-            await Promise.all(executionArray);
-            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', sqlRequestCollection.sqlRequests.length, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
-            sqlPool.close()
-        } catch(err) {
-            WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
-            throw(err)
-        } finally {
-            this._logStack.pop()
+            
         }
+        //await Promise.all(executionArray);
+
+        await this.executePromisesWithProgress(executionArray, (p:number)=>{
+            if(p>0 && p%logFrequency==0) {
+                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', p, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
+            }
+        })
+
+        
+        sqlPool.close()
+    } catch(err) {
+        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+        throw(err)
+    } finally {
+        this._logStack.pop()
+    }
+
+     
+    }
+
+    private executePromisesWithProgress(promises:any[], progressCallback:any) {
+        let d:number=0
+        progressCallback(0);
+
+        for(const promise of promises) {
+            promise.then(() => {
+                d++;
+                progressCallback(d)
+            })
+        }
+        return Promise.all(promises);
     }
 
 }

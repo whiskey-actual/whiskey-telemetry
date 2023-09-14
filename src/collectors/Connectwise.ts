@@ -65,8 +65,8 @@ export class Connectwise
           .input('connectwiseFreeMemory', sql.BigInt, computers[i].FreeMemory)
           // datetimes
           .input('connectwiseLastObserved', sql.DateTime2, new Date(computers[i].RemoteAgentLastContact))
-          .input('connectwiseWindowsUpdateDate', sql.DateTime2, new Date(computers[i].WindowsUpdateDate))
-          .input('connectwiseAntivirusDefinitionDate', sql.DateTime2, new Date(computers[i].AntivirusDefinitionDate))
+          .input('connectwiseWindowsUpdateDate', sql.DateTime2, computers[i].WindowsUpdateDate ? new Date(computers[i].WindowsUpdateDate) : undefined)
+          .input('connectwiseAntivirusDefinitionDate', sql.DateTime2, computers[i].AntivirusDefinitionDate ? new Date(computers[i].AntivirusDefinitionDate) : undefined)
           .input('connectwiseFirstSeen', sql.DateTime2, new Date(computers[i].DateAdded))
           output.sqlRequests.push(q)
         }  catch(err) {
