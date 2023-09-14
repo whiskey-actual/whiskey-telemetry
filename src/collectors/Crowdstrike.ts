@@ -69,10 +69,11 @@ export class Crowdstrike
           .input('crowdstrikeStatus', sql.VarChar(255), deviceDetails.status)
           .input('crowdstrikeSystemManufacturer', sql.VarChar(255), deviceDetails.system_manufacturer)
           .input('crowdstrikeSystemProductName', sql.VarChar(255), deviceDetails.system_product_name)
-          .input('crowdstrikeFirstSeenDateTime', sql.VarChar(255), new Date(deviceDetails.first_seen))
-          .input('crowdstrikeLastSeenDateTime', sql.VarChar(255), new Date(deviceDetails.last_seen))
-          .input('crowdstrikeModifiedDateTime', sql.VarChar(255), new Date(deviceDetails.modified_timestamp))
           .input('crowdstrikeKernelVersion', sql.VarChar(255), deviceDetails.kernel_version)
+          // datetimes
+          .input('crowdstrikeFirstSeenDateTime', sql.DateTime2, new Date(deviceDetails.first_seen))
+          .input('crowdstrikeLastSeenDateTime', sql.DateTime2, new Date(deviceDetails.last_seen))
+          .input('crowdstrikeModifiedDateTime', sql.DateTime2, new Date(deviceDetails.modified_timestamp))
           output.sqlRequests.push(q)
         })
       } catch(err) {

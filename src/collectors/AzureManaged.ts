@@ -69,7 +69,6 @@ export class AzureManaged {
               .input('azureManagedSubscriberCarrier', sql.VarChar(255), deviceList[i].subscriberCarrier)
               .input('azureManagedMEID', sql.VarChar(255), deviceList[i].meid)
               .input('azureManagedPartnerReportedThreatState', sql.VarChar(255), deviceList[i].partnerReportedThreatState)
-              .input('azureManagedRequireUserEnrollmentApproval', sql.VarChar(255), deviceList[i].requireUserEnrollmentApproval)
               .input('azureManagedICCID', sql.VarChar(255), deviceList[i].iccid)
               .input('azureManagedUDID', sql.VarChar(255), deviceList[i].udid)
               .input('azureManagedNotes', sql.VarChar(255), deviceList[i].notes)
@@ -86,6 +85,7 @@ export class AzureManaged {
               .input('azureManagedComplianceGracePeriodExpirationDateTime', sql.DateTime2, deviceList[i].complianceGracePeriodExpirationDateTime ? new Date(deviceList[i].complianceGracePeriodExpirationDateTime) : undefined)
               .input('azureManagedManagementCertificateExpirationDateTime', sql.DateTime2, deviceList[i].managementCertificateExpirationDateTime ? new Date(deviceList[i].managementCertificateExpirationDateTime) : undefined)
               // bit
+              .input('azureManagedRequireUserEnrollmentApproval', sql.Bit, deviceList[i].requireUserEnrollmentApproval ? deviceList[i].requireUserEnrollmentApproval : false)
               .input('azureManagedIsEASActivated', sql.Bit, deviceList[i].easActivated ? deviceList[i].easActivated : false)
               .input('azureManagedIsAzureADRegistered', sql.Bit, deviceList[i].azureADRegistered ? deviceList[i].azureADRegistered : false)
               .input('azureManagedIsSupervised', sql.Bit, deviceList[i].isSupervised ? deviceList[i].isSupervised : false)

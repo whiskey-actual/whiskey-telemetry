@@ -46,12 +46,14 @@ export class ActiveDirectory
       for(let i=0; i<searchEntries.length; i++) {
         try {
           let q = new sql.Request()
-          .input('deviceName', sql.VarChar(64), searchEntries[i].cn.toString())
-          .input('activeDirectoryDN', sql.VarChar(255), searchEntries[i].dn.toString())
-          .input('activeDirectoryOperatingSystem', sql.VarChar(255), searchEntries[i].operatingSystem ? searchEntries[i].operatingSystem.toString() : undefined)
-          .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), searchEntries[i].operatingSystemVersion ? searchEntries[i].operatingSystemVersion.toString() : undefined)
-          .input('activeDirectoryDNSHostName', sql.VarChar(255), searchEntries[i].dNSHostName ? searchEntries[i].dNSHostName.toString(): undefined)
+          .input('deviceName', sql.VarChar(64), WhiskeyUtilities.CleanedString(searchEntries[i].cn))
+          .input('activeDirectoryDN', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].dn))
+          .input('activeDirectoryOperatingSystem', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystem))
+          .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystemVersion))
+          .input('activeDirectoryDNSHostName', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].dNSHostName))
+          // int
           .input('activeDirectoryLogonCount', sql.Int, isNaN(Number(searchEntries[i].logonCount)) ? 0 : Number(searchEntries[i].logonCount))
+          // datetimes
           .input('activeDirectoryWhenCreated', sql.DateTime2, this.ldapTimestampToJS(searchEntries[i].whenCreated.toString()))
           .input('activeDirectoryWhenChanged', sql.DateTime2, searchEntries[i].whenChanged ? this.ldapTimestampToJS(searchEntries[i].whenChanged.toString()) : undefined)
           .input('activeDirectoryLastLogon', sql.DateTime2, searchEntries[i].lastLogon ? this.ldapTimestampToJS(searchEntries[i].lastLogon.toString()) : undefined)
