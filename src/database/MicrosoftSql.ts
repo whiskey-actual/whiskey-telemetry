@@ -72,7 +72,7 @@ export class MicrosoftSql {
             })
             .catch((err:string) => {
                 WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
-                console.debug(promise.parameters)
+                console.debug(promise)
             })
             
             
