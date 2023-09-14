@@ -29,10 +29,17 @@ export class MicrosoftSql {
             for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
                 const r = sqlPool.request()
                 r.parameters = sqlRequestCollection.sqlRequests[i].parameters
-                await r.execute(sqlRequestCollection.sprocName)
+
+                try {
+                    await r.execute(sqlRequestCollection.sprocName)
+                } catch(err) {
+                    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+                    console.debug(sqlRequestCollection.sqlRequests[i])
+                }
+                
                 if(i>0 && i%logFrequency==0) {
                     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('', 'persisted', i, sqlRequestCollection.sqlRequests.length, startDate, new Date()));
-                  }
+                }
             }
             sqlPool.close()
         } catch(err) {

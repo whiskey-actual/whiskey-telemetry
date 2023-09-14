@@ -33,11 +33,11 @@ export class AzureManaged {
         
         for(let i=0; i<deviceList.length; i++) {
             try {
-            let q = new sql.Request()
+              let q = new sql.Request()
               .input('deviceName', sql.VarChar(255), deviceList[i].deviceName.toString())
               .input('azureManagedDeviceName', sql.VarChar(255), deviceList[i].azureManagedDeviceName)
               .input('azureManagedId', sql.VarChar(255), deviceList[i].id)
-              .input('azureManagedUserId', sql.VarChar(255), deviceList[i].userId)
+              .input('azureManagedUserId', sql.VarChar(255), deviceList[i].userId.toString().trim())
               .input('azureManagedManagedDeviceOwnerType', sql.VarChar(255), deviceList[i].managedDeviceOwnerType)
               .input('azureManagedOperatingSystem', sql.VarChar(255), deviceList[i].operatingSystem)
               .input('azureManagedComplianceState', sql.VarChar(255), deviceList[i].complianceState)
