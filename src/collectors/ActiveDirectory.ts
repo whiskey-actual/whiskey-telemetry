@@ -46,7 +46,7 @@ export class ActiveDirectory
       for(let i=0; i<searchEntries.length; i++) {
         try {
           let q = new sql.Request()
-          .input('deviceName', sql.VarChar(64), WhiskeyUtilities.CleanedString(searchEntries[i].cn))
+          .input('deviceName', sql.VarChar(64), WhiskeyUtilities.CleanedString(searchEntries[i].cn, true))
           .input('activeDirectoryDN', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].dn))
           .input('activeDirectoryOperatingSystem', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystem))
           .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystemVersion))
