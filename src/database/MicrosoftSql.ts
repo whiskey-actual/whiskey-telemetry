@@ -15,7 +15,7 @@ export class MicrosoftSql {
     private _showDebug:boolean=false;
     private _sqlConfig:any=undefined
 
-    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=250) {
+    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
     this._logStack.push("writeToSql");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
 
@@ -65,10 +65,17 @@ export class MicrosoftSql {
         progressCallback(0);
 
         for(const promise of promises) {
-            promise.then(() => {
+            promise
+            .then(() => {
                 d++;
                 progressCallback(d)
             })
+            .catch((err:string) => {
+                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+                console.debug(promise.parameters)
+            })
+            
+            
         }
         return Promise.all(promises);
     }
