@@ -1,4 +1,4 @@
-import mssql from 'mssql'
+import mssql, { IProcedureResult } from 'mssql'
 import { SqlRequestCollection } from './SqlRequestCollection';
 import { WhiskeyUtilities } from 'whiskey-utilities';
 
@@ -25,14 +25,21 @@ export class MicrosoftSql {
         const sqlPool = await mssql.connect(this._sqlConfig)
         WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected; executing ${sqlRequestCollection.sprocName} for ${sqlRequestCollection.sqlRequests.length} items .. `)
 
-        let executionArray = []
+        let executionArray:Promise<void|IProcedureResult<any>>[] = []
 
         const startDate:Date = new Date()
         for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
             const r = sqlPool.request()
             try {
                 r.parameters = sqlRequestCollection.sqlRequests[i].parameters
-                executionArray.push(r.execute(sqlRequestCollection.sprocName))
+                r.verbose = true
+                executionArray.push(
+                    r
+                    .execute(sqlRequestCollection.sprocName)
+                    .catch((reason:any) =>{
+                        console.debug(r)
+                    })
+                )
                 //await r.execute(sqlRequestCollection.sprocName)
             } catch(err) {
                 WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
@@ -60,7 +67,7 @@ export class MicrosoftSql {
      
     }
 
-    private executePromisesWithProgress(promises:any[], progressCallback:any) {
+    private executePromisesWithProgress(promises:Promise<void|IProcedureResult<any>>[], progressCallback:any) {
         let d:number=0
         progressCallback(0);
 
@@ -70,7 +77,7 @@ export class MicrosoftSql {
                 d++;
                 progressCallback(d)
             })
-            .catch((err:string) => {
+            .catch((err: any) => {
                 WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
             })
             
