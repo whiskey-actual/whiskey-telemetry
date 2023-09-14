@@ -1,8 +1,8 @@
 import https from 'https'
 import axios from 'axios'
 import { WhiskeyUtilities } from 'whiskey-utilities'
-import { ConnectwiseDevice } from '../Device'
-
+import { SqlRequestCollection } from "../database/SqlRequestCollection";
+import sql from 'mssql'
 
 export class Connectwise
 {
@@ -12,99 +12,110 @@ export class Connectwise
     this._showDetails=showDetails;
     this._showDebug=showDebug;
   }
-  _logStack:string[]=[]
-  _showDetails:boolean=false;
-  _showDebug:boolean=false;
+  private _logStack:string[]=[]
+  private _showDetails:boolean=false;
+  private _showDebug:boolean=false;
 
-  public async fetch(baseURL:string, clientId:string, userName:string, password:string):Promise<ConnectwiseDevice[]> {
-
-    let output:Array<ConnectwiseDevice> = []
+  public async fetch(baseURL:string, clientId:string, userName:string, password:string):Promise<SqlRequestCollection> {
     this._logStack.push('fetch')
-
+    let output = new SqlRequestCollection("sp_add_Connectwise_device")
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
 
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false})
-    axios.defaults.httpsAgent=httpsAgent;
-    const instance = axios.create({baseURL: baseURL, headers: {clientId: clientId}});
-    const response = await instance.post('/apitoken', { UserName: userName, Password: password});
-    const accessToken = response.data.AccessToken;
-    instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received accessToken ..`)
+    try {
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying computers ..`)
-    const queryComputers = await instance.get('/Computers?pagesize=10000&orderby=ComputerName asc')
-    const computers = queryComputers.data
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${computers.length} devices received.`)
-    for(let i=0; i<computers.length; i++) {
-      let d:ConnectwiseDevice = {
-        deviceName: computers[i].ComputerName.toString(),
-        observedByConnectwise: true,
-        connectwiseId: computers[i].Id,
-        connectwiseLocation: computers[i].Location.Name,
-        connectwiseClient: computers[i].Client.Name,
-        connectwiseOperatingSystem: computers[i].OperatingSystemName,
-        connectwiseOperatingSystemVersion: computers[i].OperatingSystemVersion,
-        connectwiseDomainName: computers[i].DomainName,
-        connectwiseLastObserved: computers[i].RemoteAgentLastContact,
-        connectwiseAgentVersion: computers[i].RemoteAgentVersion,
-        connectwiseComment: computers[i].Comment,
-        connectwiseWindowsUpdateDate: computers[i].WindowsUpdateDate,
-        connectwiseAntivirusDefinitionDate: computers[i].AntivirusDefinitionDate,
-        connectwiseTotalMemory: computers[i].TotalMemory,
-        connectwiseFreeMemory: computers[i].FreeMemory,
-        connectwiseIpAddress: computers[i].LocalIPAddress,
-        connectwiseMacAddress: computers[i].MACAddress,
-        connectwiseLastUserName: computers[i].LastUserName,
-        connectwiseFirstSeen: computers[i].DateAdded,
-        connectwiseType: computers[i].Type,
-        connectwiseStatus: computers[i].Status,
-        connectwiseSerialNumber: computers[i].SerialNumber,
-        connectwiseBiosManufacturer: computers[i].BiosManufacturer,
-        connectwiseModel: computers[i].Model,
-        connectwiseDescription: computers[i].Description,
+      // get the access token ..
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token ..')
+      const httpsAgent = new https.Agent({ rejectUnauthorized: false})
+      axios.defaults.httpsAgent=httpsAgent;
+      const instance = axios.create({baseURL: baseURL, headers: {clientId: clientId}});
+      const response = await instance.post('/apitoken', { UserName: userName, Password: password});
+      const accessToken = response.data.AccessToken;
+      instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received accessToken ..`)
+
+      // get computers ..
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying computers ..`)
+      const queryComputers = await instance.get('/Computers?pagesize=10000&orderby=ComputerName asc')
+      const computers = queryComputers.data
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${computers.length} devices received; processing ..`)
+      for(let i=0; i<computers.length; i++) {
+        try {
+          let q = new sql.Request()
+          .input('deviceName', sql.VarChar(255), computers[i].ComputerName.toString())
+          .input('connectwiseId', sql.VarChar(255), computers[i].Id)
+          .input('connectwiseLocation', sql.VarChar(255), computers[i].Location.Name)
+          .input('connectwiseClient', sql.VarChar(255), computers[i].Client.Name)
+          .input('connectwiseOperatingSystem', sql.VarChar(255), computers[i].OperatingSystemName)
+          .input('connectwiseOperatingSystemVersion', sql.VarChar(255), computers[i].OperatingSystemVersion)
+          .input('connectwiseDomainName', sql.VarChar(255), computers[i].DomainName)
+          .input('connectwiseLastObserved', sql.VarChar(255), computers[i].RemoteAgentLastContact)
+          .input('connectwiseAgentVersion', sql.VarChar(255), computers[i].RemoteAgentVersion)
+          .input('connectwiseComment', sql.VarChar(255), computers[i].Comment)
+          .input('connectwiseWindowsUpdateDate', sql.VarChar(255), computers[i].WindowsUpdateDate)
+          .input('connectwiseAntivirusDefinitionDate', sql.VarChar(255), computers[i].AntivirusDefinitionDate)
+          .input('connectwiseTotalMemory', sql.VarChar(255), computers[i].TotalMemory)
+          .input('connectwiseFreeMemory', sql.VarChar(255), computers[i].FreeMemory)
+          .input('connectwiseIpAddress', sql.VarChar(255), computers[i].LocalIPAddress)
+          .input('connectwiseMacAddress', sql.VarChar(255), computers[i].MACAddress)
+          .input('connectwiseLastUserName', sql.VarChar(255), computers[i].LastUserName)
+          .input('connectwiseFirstSeen', sql.VarChar(255), computers[i].DateAdded)
+          .input('connectwiseType', sql.VarChar(255), computers[i].Type)
+          .input('connectwiseStatus', sql.VarChar(255), computers[i].Status)
+          .input('connectwiseSerialNumber', sql.VarChar(255), computers[i].SerialNumber)
+          .input('connectwiseBiosManufacturer', sql.VarChar(255), computers[i].BiosManufacturer)
+          .input('connectwiseModel', sql.VarChar(255), computers[i].Model)
+          .input('connectwiseDescription', sql.VarChar(255), computers[i].Description)
+          output.sqlRequests.push(q)
+        }  catch(err) {
+          WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
+        }
       }
-      output.push(d)
+
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. done; querying network devices ..`)
+      const queryNetworkDevices = await instance.get('/NetworkDevices?pagesize=10000&orderby=Name asc')
+      const networkDevices = queryNetworkDevices.data
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${networkDevices.length} devices received.`)
+      for(let i=0; i<computers.length; i++) {
+        try {
+          let q = new sql.Request()
+          .input('deviceName', sql.VarChar(255), computers[i].ComputerName.toString())
+          .input('connectwiseId', sql.VarChar(255), computers[i].Id)
+          .input('connectwiseLocation', sql.VarChar(255), computers[i].Location.Name)
+          .input('connectwiseClient', sql.VarChar(255), computers[i].Client.Name)
+          .input('connectwiseOperatingSystem', sql.VarChar(255), computers[i].OperatingSystemName)
+          .input('connectwiseOperatingSystemVersion', sql.VarChar(255), computers[i].OperatingSystemVersion)
+          .input('connectwiseDomainName', sql.VarChar(255), computers[i].DomainName)
+          .input('connectwiseLastObserved', sql.VarChar(255), computers[i].RemoteAgentLastContact)
+          .input('connectwiseAgentVersion', sql.VarChar(255), computers[i].RemoteAgentVersion)
+          .input('connectwiseComment', sql.VarChar(255), computers[i].Comment)
+          .input('connectwiseWindowsUpdateDate', sql.VarChar(255), computers[i].WindowsUpdateDate)
+          .input('connectwiseAntivirusDefinitionDate', sql.VarChar(255), computers[i].AntivirusDefinitionDate)
+          .input('connectwiseTotalMemory', sql.VarChar(255), computers[i].TotalMemory)
+          .input('connectwiseFreeMemory', sql.VarChar(255), computers[i].FreeMemory)
+          .input('connectwiseIpAddress', sql.VarChar(255), computers[i].LocalIPAddress)
+          .input('connectwiseMacAddress', sql.VarChar(255), computers[i].MACAddress)
+          .input('connectwiseLastUserName', sql.VarChar(255), computers[i].LastUserName)
+          .input('connectwiseFirstSeen', sql.VarChar(255), computers[i].DateAdded)
+          .input('connectwiseType', sql.VarChar(255), computers[i].Type)
+          .input('connectwiseStatus', sql.VarChar(255), computers[i].Status)
+          .input('connectwiseSerialNumber', sql.VarChar(255), computers[i].SerialNumber)
+          .input('connectwiseBiosManufacturer', sql.VarChar(255), computers[i].BiosManufacturer)
+          .input('connectwiseModel', sql.VarChar(255), computers[i].Model)
+          .input('connectwiseDescription', sql.VarChar(255), computers[i].Description)
+          output.sqlRequests.push(q)
+        }  catch(err) {
+          WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
+        }
+      }
+
+    } catch(err) {
+      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
+      throw(err)
+    } finally {
+      this._logStack.pop()
     }
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. querying network devices ..`)
-    const queryNetworkDevices = await instance.get('/NetworkDevices?pagesize=10000&orderby=Name asc')
-    const networkDevices = queryNetworkDevices.data
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. ${networkDevices.length} devices received.`)
-    for(let i=0; i<computers.length; i++) {
-      let d:ConnectwiseDevice = {
-        deviceName: computers[i].ComputerName.toString(),
-        observedByConnectwise: true,
-        connectwiseId: computers[i].Id,
-        connectwiseLocation: computers[i].Location.Name,
-        connectwiseClient: computers[i].Client.Name,
-        connectwiseOperatingSystem: computers[i].OperatingSystemName,
-        connectwiseOperatingSystemVersion: computers[i].OperatingSystemVersion,
-        connectwiseDomainName: computers[i].DomainName,
-        connectwiseLastObserved: computers[i].RemoteAgentLastContact,
-        connectwiseAgentVersion: computers[i].RemoteAgentVersion,
-        connectwiseComment: computers[i].Comment,
-        connectwiseWindowsUpdateDate: computers[i].WindowsUpdateDate,
-        connectwiseAntivirusDefinitionDate: computers[i].AntivirusDefinitionDate,
-        connectwiseTotalMemory: computers[i].TotalMemory,
-        connectwiseFreeMemory: computers[i].FreeMemory,
-        connectwiseIpAddress: computers[i].LocalIPAddress,
-        connectwiseMacAddress: computers[i].MACAddress,
-        connectwiseLastUserName: computers[i].LastUserName,
-        connectwiseFirstSeen: computers[i].DateAdded,
-        connectwiseType: computers[i].Type,
-        connectwiseStatus: computers[i].Status,
-        connectwiseSerialNumber: computers[i].SerialNumber,
-        connectwiseBiosManufacturer: computers[i].BiosManufacturer,
-        connectwiseModel: computers[i].Model,
-        connectwiseDescription: computers[i].Description,
-      }
-      output.push(d)
-    }
-
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
-    return new Promise<ConnectwiseDevice[]>((resolve) => {resolve(output)})
+    return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
+  
   }
-
 }

@@ -2,8 +2,8 @@
 import { WhiskeyUtilities } from 'whiskey-utilities'
 
 // components
+import { MicrosoftSql } from './database/MicrosoftSql'
 import { SqlRequestCollection } from './database/SqlRequestCollection'
-import { ConnectwiseDevice, CrowdstrikeDevice } from './Device'
 
 // collectors
 import { ActiveDirectory } from './collectors/ActiveDirectory'
@@ -12,13 +12,22 @@ import { AzureManaged } from './collectors/AzureManaged'
 import { Connectwise } from './collectors/Connectwise'
 import { Crowdstrike } from './collectors/Crowdstrike'
 
-
 export class Telemetry {
 
-    constructor(logStack:string[]) {
+    constructor(logStack:string[], MicrosoftSqlConfig:any, showDetails:boolean=false, showDebug:boolean=false) {
         this._logstack=logStack
+        this._mssql=new MicrosoftSql(this._logstack, MicrosoftSqlConfig)
+        this._showDetails=showDetails
+        this._showDebug=showDebug
     }
-    _logstack:string[]=[]
+    private _logstack:string[]=[]
+    private _mssql:MicrosoftSql
+    private _showDetails:boolean=false
+    private _showDebug:boolean=false
+
+    public async persistToMicrosoftSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=250) {
+        await this._mssql.writeToSql(sqlRequestCollection, logFrequency)
+    }
 
     // public async isMongoDatabaseOK(mongoAdminURI:string, mongoURI:string, db:string):Promise<boolean> {
     //     this._logstack.push('isMongoDatabaseOK');
@@ -52,12 +61,12 @@ export class Telemetry {
     //     return new Promise<boolean>((resolve) => {resolve(output)})
     // }
 
-    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
+    public async fetchActiveDirectory(ldapURL:string, bindDN:string, pw:string, searchDN:string, isPaged:boolean=true, sizeLimit:number=500):Promise<SqlRequestCollection> {
         this._logstack.push('ActiveDirectory');
         let output:SqlRequestCollection
 
         try {
-            const ad = new ActiveDirectory(this._logstack, showDetails, showDebug);
+            const ad = new ActiveDirectory(this._logstack, this._showDetails, this._showDebug);
             output = await ad.fetch(ldapURL, bindDN, pw, searchDN, isPaged, sizeLimit)
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
@@ -68,12 +77,12 @@ export class Telemetry {
         return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
-    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
+    public async fetchAzureActiveDirectory(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<SqlRequestCollection> {
         this._logstack.push('AzureActiveDirectory');
         let output:SqlRequestCollection
 
         try {
-            const aad = new AzureActiveDirectory(this._logstack, showDetails, showDebug);
+            const aad = new AzureActiveDirectory(this._logstack, this._showDetails, this._showDebug);
             output = await aad.fetch(TENANT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, CLIENT_ID, CLIENT_SECRET)
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
@@ -84,12 +93,12 @@ export class Telemetry {
         return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
-    public async fetchAzureManaged(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string, showDetails:boolean=false, showDebug:boolean=false):Promise<SqlRequestCollection> {
+    public async fetchAzureManaged(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<SqlRequestCollection> {
         this._logstack.push('AzureManaged');
         let output:SqlRequestCollection
 
         try {
-            const am = new AzureManaged(this._logstack, showDetails, showDebug);
+            const am = new AzureManaged(this._logstack, this._showDetails, this._showDebug);
             output = await am.fetch(TENANT_ID, AAD_ENDPOINT, GRAPH_ENDPOINT, CLIENT_ID, CLIENT_SECRET)
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
@@ -100,12 +109,12 @@ export class Telemetry {
         return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
-    public async fetchConnectwise(baseURL:string, clientId:string, userName:string, password:string, showDetails:boolean=false, showDebug:boolean=false):Promise<ConnectwiseDevice[]> {
+    public async fetchConnectwise(baseURL:string, clientId:string, userName:string, password:string):Promise<SqlRequestCollection> {
         this._logstack.push('Connectwise');
-        let output:ConnectwiseDevice[] = []
+        let output:SqlRequestCollection
 
         try {
-            const cw = new Connectwise(this._logstack, showDetails, showDebug);
+            const cw = new Connectwise(this._logstack, this._showDetails, this._showDebug);
             output = await cw.fetch(baseURL, clientId, userName, password);
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
@@ -113,15 +122,15 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<ConnectwiseDevice[]>((resolve) => {resolve(output)})
+        return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
-    public async fetchCrowdstrike(baseURL:string, clientId:string, clientSecret:string, showDetails:boolean=false, showDebug:boolean=false):Promise<CrowdstrikeDevice[]> {
+    public async fetchCrowdstrike(baseURL:string, clientId:string, clientSecret:string):Promise<SqlRequestCollection> {
         this._logstack.push('Crowdstrike');
-        let output:CrowdstrikeDevice[] = []
+        let output:SqlRequestCollection
 
         try {
-            const cs = new Crowdstrike(this._logstack, showDetails, showDebug)
+            const cs = new Crowdstrike(this._logstack, this._showDetails, this._showDebug)
             output = await cs.fetch(baseURL, clientId, clientSecret)
         } catch(err) {
             WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logstack, `${err}`)
@@ -129,7 +138,7 @@ export class Telemetry {
         }
         
         this._logstack.pop()
-        return new Promise<CrowdstrikeDevice[]>((resolve) => {resolve(output)})
+        return new Promise<SqlRequestCollection>((resolve) => {resolve(output)})
     }
 
 

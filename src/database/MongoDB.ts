@@ -4,7 +4,7 @@ import { WhiskeyUtilities } from "whiskey-utilities";
 import { DeviceSchema } from '../Device'
 
 
-export class MongoDatabase {
+export class MongoDB {
 
   _logStack:string[]=[]
   constructor(logStack:string[]) {
