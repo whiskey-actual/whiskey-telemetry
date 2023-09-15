@@ -49,7 +49,7 @@ export class ActiveDirectory
           .input('deviceName', sql.VarChar(64), WhiskeyUtilities.CleanedString(searchEntries[i].cn))
           .input('activeDirectoryDN', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].dn))
           .input('activeDirectoryOperatingSystem', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystem))
-          .input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystemVersion))
+          //.input('activeDirectoryOperatingSystemVersion', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].operatingSystemVersion))
           .input('activeDirectoryDNSHostName', sql.VarChar(255), WhiskeyUtilities.CleanedString(searchEntries[i].dNSHostName))
           // int
           .input('activeDirectoryLogonCount', sql.Int, isNaN(Number(searchEntries[i].logonCount)) ? 0 : Number(searchEntries[i].logonCount))
