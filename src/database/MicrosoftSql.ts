@@ -15,7 +15,7 @@ export class MicrosoftSql {
     private _showDebug:boolean=false;
     private _sqlConfig:any=undefined
 
-    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number) {
+    public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
     this._logStack.push("writeToSql");
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
 
@@ -27,7 +27,6 @@ export class MicrosoftSql {
 
         let executionArray:Promise<void|IProcedureResult<any>>[] = []
 
-        const startDate:Date = new Date()
         for(let i=0; i<sqlRequestCollection.sqlRequests.length; i++) {
             const r = sqlPool.request()
             try {
@@ -50,7 +49,7 @@ export class MicrosoftSql {
         }
         //await Promise.all(executionArray);
 
-        await WhiskeyUtilities.executePromisesWithProgress(executionArray, this._logStack)
+        await WhiskeyUtilities.executePromisesWithProgress(executionArray, this._logStack, logFrequency)
 
         
         sqlPool.close()
