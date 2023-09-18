@@ -44,7 +44,7 @@ export class Crowdstrike
 
       try {
         executionStack.push(
-        await instance.get(`/devices/entities/devices/v1?ids=${foundDevices[i]}`).then((response:any) => {
+        instance.get(`/devices/entities/devices/v1?ids=${foundDevices[i]}`).then((response:any) => {
           const deviceDetails = response.data.resources[0];
           let q = new sql.Request()
           .input('deviceName', sql.VarChar(255), WhiskeyUtilities.CleanedString(deviceDetails.hostname))
