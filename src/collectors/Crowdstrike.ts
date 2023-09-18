@@ -36,12 +36,14 @@ export class Crowdstrike
 
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. found ${foundDevices.length} devices; fetching details ..`)
 
+    let executionStack:any = []
+
     const startDate = new Date()
 
     for(let i=0; i<foundDevices.length; i++) {
 
       try {
-
+        executionStack.push(
         await instance.get(`/devices/entities/devices/v1?ids=${foundDevices[i]}`).then((response:any) => {
           const deviceDetails = response.data.resources[0];
           let q = new sql.Request()
@@ -75,16 +77,14 @@ export class Crowdstrike
           .input('crowdstrikeLastSeenDateTime', sql.DateTime2, WhiskeyUtilities.CleanedDate(deviceDetails.last_seen))
           .input('crowdstrikeModifiedDateTime', sql.DateTime2, WhiskeyUtilities.CleanedDate(deviceDetails.modified_timestamp))
           output.sqlRequests.push(q)
-        })
+        }))
       } catch(err) {
           WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${err}`)
       }
 
-      if(i>0 && i%100==0) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, WhiskeyUtilities.getProgressMessage('','processed',i,foundDevices.length,startDate,new Date()));
-      }
-
     }
+
+    await WhiskeyUtilities.executePromisesWithProgress(executionStack, this._logStack, 10)
   
     WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
 
