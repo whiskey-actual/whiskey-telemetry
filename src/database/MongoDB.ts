@@ -30,9 +30,8 @@ export namespace MongoDB {
 
         await mongoose.connect(this._mongoURI, this._mongoConnectionOptions)
 
-        let persistPool:Promise<void>[]=[]
+        let persistPool:Promise<void|Boolean>[]=[]
 
-        const startDate = new Date()
         for(let i=0;i<deviceObjects.length; i++) {
           const persistAction = this.persistDevice(deviceObjects[i]).then((isNewDevice) => {
             if(isNewDevice) {
@@ -56,7 +55,7 @@ export namespace MongoDB {
 
     }
 
-    private async persistDevice(incomingDeviceObject:any):Promise<Boolean> {
+    private async persistDevice(incomingDeviceObject:any):Promise<boolean> {
 
       let isNewDevice:boolean=false;
 

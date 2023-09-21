@@ -5,20 +5,18 @@ import { Utilities } from 'whiskey-utilities';
 export class MicrosoftSql {
 
     constructor(logStack:string[], sqlConfig:any, showDetails:boolean=false, showDebug:boolean=false) {
-        this._logStack=logStack;
         this._sqlConfig = sqlConfig;
         this._showDetails=showDetails;
         this._showDebug=showDebug;
         this._utilities = new Utilities(logStack, showDetails, showDebug);
     }
-    private _logStack:string[]=[]
     private _showDetails:boolean=false;
     private _showDebug:boolean=false;
     private _sqlConfig:any=undefined
     private _utilities:Utilities=new Utilities([])
 
     public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
-    this._logStack.push("writeToSql");
+   this._utilities.logStack.push("writeToSql");
     this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `initializing.. `)
 
     try {
@@ -59,7 +57,7 @@ export class MicrosoftSql {
         this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${err}`)
         throw(err)
     } finally {
-        this._logStack.pop()
+       this._utilities.logStack.pop()
     }
 
      
