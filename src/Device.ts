@@ -6,10 +6,10 @@ export interface Device {
 
 export interface ActiveDirectoryDevice {
   // mandatory
-  deviceName: string,
   observedByActiveDirectory: boolean,
-  // strings
+  deviceName: string,
   activeDirectoryDN: string,
+  // strings
   activeDirectoryOperatingSystem: string|undefined,
   activeDirectoryOperatingSystemVersion: string|undefined,
   activeDirectoryDNSHostName: string|undefined,
@@ -25,36 +25,37 @@ export interface ActiveDirectoryDevice {
 
 export interface AzureActiveDirectoryDevice {
   // mandatory
-  deviceName: string,
   observedByAzureActiveDirectory: boolean,
-  //strings
-  azureDisplayName: string,
-  azureId: string;
-  azureDeviceCategory: string;
+  deviceName: string,
   azureDeviceId: string;
-  azureDeviceMetadata: string;
-  azureDeviceOwnership: string;
-  azureDeviceVersion: string;
-  azureDomainName: string;
-  azureEnrollmentProfileType: string;
-  azureEnrollmentType: string;
-  azureExternalSourceName: string;
-  azureManagementType: string;
-  azureManufacturer: string;
-  azureMDMAppId: string;
-  azureModel: string;
-  azureOperatingSystem: string;
-  azureOperatingSystemVersion: string;
-  azureProfileType: string;
-  azureSourceType: string;
-  azureTrustType: string;
+  
+  //strings
+  azureDisplayName: string|undefined,
+  azureId: string|undefined;
+  azureDeviceCategory: string|undefined;
+  azureDeviceMetadata: string|undefined;
+  azureDeviceOwnership: string|undefined;
+  azureDeviceVersion: string|undefined;
+  azureDomainName: string|undefined;
+  azureEnrollmentProfileType: string|undefined;
+  azureEnrollmentType: string|undefined;
+  azureExternalSourceName: string|undefined;
+  azureManagementType: string|undefined;
+  azureManufacturer: string|undefined;
+  azureMDMAppId: string|undefined;
+  azureModel: string|undefined;
+  azureOperatingSystem: string|undefined;
+  azureOperatingSystemVersion: string|undefined;
+  azureProfileType: string|undefined;
+  azureSourceType: string|undefined;
+  azureTrustType: string|undefined;
   // dates
-  azureDeletedDateTime: Date;
-  azureApproximateLastSignInDateTime: Date;
-  azureComplianceExpirationDateTime: Date;
-  azureCreatedDateTime: Date;
-  azureOnPremisesLastSyncDateTime: Date;
-  azureRegistrationDateTime: Date;
+  azureDeletedDateTime: Date|undefined;
+  azureApproximateLastSignInDateTime: Date|undefined;
+  azureComplianceExpirationDateTime: Date|undefined;
+  azureCreatedDateTime: Date|undefined;
+  azureOnPremisesLastSyncDateTime: Date|undefined;
+  azureRegistrationDateTime: Date|undefined;
   // booleans
   azureOnPremisesSyncEnabled: boolean;
   azureAccountEnabled: boolean;

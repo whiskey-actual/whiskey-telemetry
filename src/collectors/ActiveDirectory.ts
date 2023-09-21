@@ -46,10 +46,11 @@ export class ActiveDirectory
         try {
 
           const device:ActiveDirectoryDevice = {
-            deviceName: this._utilities.CleanedString(searchEntries[i].cn),
+            // mandatory
             observedByActiveDirectory: true,
+            deviceName: searchEntries[i].cn.toString().trim(),
+            activeDirectoryDN: searchEntries[i].dn.toString().trim(),
             // strings
-            activeDirectoryDN: this._utilities.CleanedString(searchEntries[i].dn),
             activeDirectoryOperatingSystem: this._utilities.CleanedString(searchEntries[i].operatingSystem),
             activeDirectoryOperatingSystemVersion: this._utilities.CleanedString(searchEntries[i].operatingSystemVersion),
             activeDirectoryDNSHostName: this._utilities.CleanedString(searchEntries[i].dNSHostName),
