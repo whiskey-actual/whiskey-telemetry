@@ -1,6 +1,6 @@
 import mssql, { IProcedureResult } from 'mssql'
 import { SqlRequestCollection } from './SqlRequestCollection';
-import { WhiskeyUtilities } from 'whiskey-utilities';
+import { Utilities } from 'whiskey-utilities';
 
 export class MicrosoftSql {
 
@@ -9,21 +9,23 @@ export class MicrosoftSql {
         this._sqlConfig = sqlConfig;
         this._showDetails=showDetails;
         this._showDebug=showDebug;
+        this._utilities = new Utilities(logStack, showDetails, showDebug);
     }
     private _logStack:string[]=[]
     private _showDetails:boolean=false;
     private _showDebug:boolean=false;
     private _sqlConfig:any=undefined
+    private _utilities:Utilities=new Utilities([])
 
     public async writeToSql(sqlRequestCollection:SqlRequestCollection, logFrequency:number=1000) {
     this._logStack.push("writeToSql");
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `initializing.. `)
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `initializing.. `)
 
     try {
 
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${this._sqlConfig.server} ..`)
+        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `.. connecting to mssql @ ${this._sqlConfig.server} ..`)
         const sqlPool = await mssql.connect(this._sqlConfig)
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected; executing ${sqlRequestCollection.sprocName} for ${sqlRequestCollection.sqlRequests.length} items .. `)
+        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `.. connected; executing ${sqlRequestCollection.sprocName} for ${sqlRequestCollection.sqlRequests.length} items .. `)
 
         let executionArray:Promise<void|IProcedureResult<any>>[] = []
 
@@ -36,25 +38,25 @@ export class MicrosoftSql {
                     r
                     .execute(sqlRequestCollection.sprocName)
                     .catch((reason:any) =>{
-                        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${reason}`)
+                        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${reason}`)
                         console.debug(r)
                     })
                 )
                 //await r.execute(sqlRequestCollection.sprocName)
             } catch(err) {
-                WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+                this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${err}`)
                 console.debug(sqlRequestCollection.sqlRequests[i])
             }
             
         }
         //await Promise.all(executionArray);
 
-        await WhiskeyUtilities.executePromisesWithProgress(executionArray, this._logStack, logFrequency)
+        await this._utilities.executePromisesWithProgress(executionArray, logFrequency)
 
         
         sqlPool.close()
     } catch(err) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `${err}`)
+        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${err}`)
         throw(err)
     } finally {
         this._logStack.pop()

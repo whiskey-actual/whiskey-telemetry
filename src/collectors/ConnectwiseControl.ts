@@ -1,47 +1,47 @@
 import axios from "axios";
 import * as msal from '@azure/msal-node'
-import { WhiskeyUtilities } from "whiskey-utilities";
+import { Utilities } from "whiskey-utilities";
 import { AzureActiveDirectoryDevice } from '../Device'
 import sql from 'mssql'
 
 export class ConnectwiseControl {
 
   constructor(logStack:string[], showDetails:boolean=false, showDebug:boolean=false) {
-    this._logStack=logStack;
     this._showDetails=showDetails;
     this._showDebug=showDebug;
+    this._utilities = new Utilities(logStack, showDetails, showDebug);
   }
-  _logStack:string[]=[]
   _showDetails:boolean=false;
   _showDebug:boolean=false;
+  private _utilities:Utilities=new Utilities([])
   
 
   public async fetch(TENANT_ID:string, AAD_ENDPOINT:string, GRAPH_ENDPOINT:string, CLIENT_ID:string, CLIENT_SECRET:string):Promise<AzureActiveDirectoryDevice[]> {
-    this._logStack.push('fetch')
+   this._utilities.logStack.push('fetch')
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, 'initializing ..')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. getting access token.. ')
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, 'initializing ..')
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, '.. getting access token.. ')
     const authResponse = await this.getToken(AAD_ENDPOINT, GRAPH_ENDPOINT, TENANT_ID, CLIENT_ID, CLIENT_SECRET);
     const accessToken = authResponse.accessToken;
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. got access token ..')
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, '.. got access token ..')
     let output:Array<AzureActiveDirectoryDevice> = []
 
     output = await this.devices(GRAPH_ENDPOINT, accessToken);
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, '.. done.')
-    this._logStack.pop()
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, '.. done.')
+   this._utilities.logStack.pop()
     return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }
 
   private async devices(GRAPH_ENDPOINT:string, accessToken:string):Promise<AzureActiveDirectoryDevice[]> {
 
     let output:Array<AzureActiveDirectoryDevice> = []
-    this._logStack.push('devices')
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. fetching devices ..`)
+   this._utilities.logStack.push('devices')
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `.. fetching devices ..`)
 
     const deviceList = await this.getData(accessToken, `${GRAPH_ENDPOINT}/v1.0/devices`)
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Ok, this._logStack, `.. received ${deviceList.length} devices; processing ..`)
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `.. received ${deviceList.length} devices; processing ..`)
 
     for(let i=0; i<deviceList.length; i++) {
       const d:AzureActiveDirectoryDevice = {
@@ -83,7 +83,7 @@ export class ConnectwiseControl {
       output.push(d)
     }
 
-    this._logStack.pop()
+   this._utilities.logStack.pop()
     return new Promise<AzureActiveDirectoryDevice[]>((resolve) => {resolve(output)})
   }
 
@@ -116,7 +116,7 @@ export class ConnectwiseControl {
   private async callAPI(accessToken:string, endpoint:string):Promise<any> {
 
     let output:any = undefined
-    this._logStack.push('callAPI')
+   this._utilities.logStack.push('callAPI')
 
     const options = { headers: { Authorization: `Bearer ${accessToken}`}}
 
@@ -124,11 +124,11 @@ export class ConnectwiseControl {
       const response = await axios.get(endpoint, options)
       output = response.data
     } catch (error:any) {
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${error.toString()}`)
+      this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `error: ${error.toString()}`)
       return error;
     }
 
-    this._logStack.pop();
+   this._utilities.logStack.pop();
     return new Promise<any>((resolve) => {resolve(output)})
 
 
@@ -137,7 +137,7 @@ export class ConnectwiseControl {
   private async getData(accesstoken:string, uri:string):Promise<any> {
 
     var output:any = []
-    this._logStack.push('getData')
+   this._utilities.logStack.push('getData')
 
     try {
 
@@ -156,22 +156,22 @@ export class ConnectwiseControl {
         }
        }
     } catch (error:any) {
-      WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `error: ${error.toString()}`)
+      this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `error: ${error.toString()}`)
     }
 
-    this._logStack.pop()
+   this._utilities.logStack.pop()
     return new Promise<any>((resolve) => {resolve(output)})
 
   }
 
   public async persist(sqlConfig:any, devices:AzureActiveDirectoryDevice[]):Promise<Boolean> {
 
-    this._logStack.push("persist");
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `persisting ${devices.length} devices ..`)
+   this._utilities.logStack.push("persist");
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `persisting ${devices.length} devices ..`)
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connecting to mssql @ ${sqlConfig.server} ..`)
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `.. connecting to mssql @ ${sqlConfig.server} ..`)
     let pool = await sql.connect(sqlConfig)
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `.. connected, persisting devices .. `)
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `.. connected, persisting devices .. `)
 
     for(let i=0; i<devices.length; i++) {
       try {
@@ -214,15 +214,15 @@ export class ConnectwiseControl {
         
       }
       catch(err) {
-        WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Error, this._logStack, `ERR: ${err}`)
-        this._logStack.pop()
+        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `ERR: ${err}`)
+       this._utilities.logStack.pop()
         throw(err)
       }
     }
 
-    WhiskeyUtilities.AddLogEntry(WhiskeyUtilities.LogEntrySeverity.Info, this._logStack, `done.`)
+    this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `done.`)
     
-    this._logStack.pop()
+   this._utilities.logStack.pop()
     return new Promise<Boolean>((resolve) => {resolve(true)})
   }
 
