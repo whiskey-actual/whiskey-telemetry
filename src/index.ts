@@ -16,12 +16,14 @@ import { ActiveDirectoryDevice, AzureActiveDirectoryDevice, AzureManagedDevice }
 
 export class Telemetry {
 
-    constructor(logStack:string[], logFrequency:number=1000, showDetails:boolean=false, showDebug:boolean=false) {
+    constructor(logStack:string[], mongoURI:string, logFrequency:number=1000, showDetails:boolean=false, showDebug:boolean=false) {
+        this._mongoURI=mongoURI
         this._logFrequency=logFrequency
         this._showDetails=showDetails
         this._showDebug=showDebug
         this._utilities = new Utilities(logStack, showDetails, showDebug);
     }
+    private _mongoURI:string=''
     private _logFrequency:number=1000
     private _showDetails:boolean=false
     private _showDebug:boolean=false
@@ -33,14 +35,14 @@ export class Telemetry {
         return new Promise<boolean>((resolve) => {resolve(true)})
     }
 
-    public async verifyMongoDB(mongoAdminURI:string, mongoURI:string, dbName:string):Promise<boolean> {
+    public async verifyMongoDB(mongoAdminURI:string, dbName:string):Promise<boolean> {
         const mongoCheck:MongoDB.CheckDB = new MongoDB.CheckDB(this._utilities.logStack);
-        await mongoCheck.checkMongoDatabase(mongoAdminURI, mongoURI, dbName);
+        await mongoCheck.checkMongoDatabase(mongoAdminURI, this._mongoURI, dbName);
         return new Promise<boolean>((resolve) => {resolve(true)})
     }
 
-    public async persistToMongoDB(mongoURI:string, mongoConnectionOptions:Object={}, deviceObjects:any):Promise<boolean> {
-        const mongodb:MongoDB.Persist = new MongoDB.Persist(this._utilities.logStack, mongoURI, mongoConnectionOptions)
+    public async persistToMongoDB(deviceObjects:any):Promise<boolean> {
+        const mongodb:MongoDB.Persist = new MongoDB.Persist(this._utilities.logStack, this._mongoURI)
         mongodb.persistDevices(deviceObjects, this._logFrequency)
         return new Promise<boolean>((resolve) => {resolve(true)})
     }

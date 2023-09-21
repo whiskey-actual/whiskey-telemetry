@@ -42,15 +42,16 @@ export namespace MongoDB {
           persistPool.push(persistAction);
         }
 
-        await Promise.all(persistPool);
+        await this._utilities.executePromisesWithProgress(persistPool)
 
         this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `.. persisted ${deviceObjects.length} devices.`)
       } catch(err) {
         this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `${err}`)
         throw(err);
+      } finally {
+        this._utilities.logStack.pop()
       }
-
-      this._utilities.logStack.pop()
+      
       return new Promise<Number>((resolve) => {resolve(deviceObjects.length)})
 
     }
@@ -58,8 +59,6 @@ export namespace MongoDB {
     private async persistDevice(incomingDeviceObject:any):Promise<Boolean> {
 
       let isNewDevice:boolean=false;
-
-      this._utilities.logStack.push("persistDevice");
 
       const fieldsToPrune:string[] = [
         'observedByActiveDirectory',
@@ -199,7 +198,6 @@ export namespace MongoDB {
       }
       )
 
-      this._utilities.logStack.pop();
       return new Promise<boolean>((resolve) => {resolve(isNewDevice)})
 
     }
