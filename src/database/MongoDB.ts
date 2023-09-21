@@ -22,7 +22,7 @@ export namespace MongoDB {
     private _showDebug:boolean=false;
     private _utilities:Utilities=new Utilities([])
     
-    public async persistDevices(deviceObjects:any[], logFrequency:number=1000):Promise<Number> {
+    public async persistDevices(deviceObjects:any[], logFrequency:number=1000) {
       this._utilities.logStack.push("persistDevices");
       this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `persisting ${deviceObjects.length} devices ..`)
 
@@ -30,14 +30,11 @@ export namespace MongoDB {
 
         await mongoose.connect(this._mongoURI, this._mongoConnectionOptions)
 
-        let persistPool:Promise<void>[]=[]
-
+        let executionArray:Promise<void>[] = []
         for(let i=0;i<deviceObjects.length; i++) {
-          const persistAction:Promise<void> = this.persistDevice(deviceObjects[i])
-          persistPool.push(persistAction);
+          executionArray.push(this.persistDevice(deviceObjects[i]));
         }
-
-        await this._utilities.executePromisesWithProgress(persistPool)
+        await this._utilities.executePromisesWithProgress(executionArray)
 
         this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `.. persisted ${deviceObjects.length} devices.`)
       } catch(err) {
@@ -46,8 +43,6 @@ export namespace MongoDB {
       } finally {
         this._utilities.logStack.pop()
       }
-      
-      return new Promise<Number>((resolve) => {resolve(deviceObjects.length)})
 
     }
 
