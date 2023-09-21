@@ -30,14 +30,10 @@ export namespace MongoDB {
 
         await mongoose.connect(this._mongoURI, this._mongoConnectionOptions)
 
-        let persistPool:Promise<void|Boolean>[]=[]
+        let persistPool:Promise<void>[]=[]
 
         for(let i=0;i<deviceObjects.length; i++) {
-          const persistAction = this.persistDevice(deviceObjects[i]).then((isNewDevice) => {
-            if(isNewDevice) {
-              this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `.. persisted new device: ${deviceObjects[i].deviceName}`)
-            }
-          })
+          const persistAction:Promise<void> = this.persistDevice(deviceObjects[i])
           persistPool.push(persistAction);
         }
 
@@ -55,7 +51,7 @@ export namespace MongoDB {
 
     }
 
-    private async persistDevice(incomingDeviceObject:any):Promise<boolean> {
+    private async persistDevice(incomingDeviceObject:any):Promise<void> {
 
       let isNewDevice:boolean=false;
 
@@ -100,104 +96,103 @@ export namespace MongoDB {
 
       const prunedDeviceObject:any = this._utilities.pruneJsonObject(incomingDeviceObject,fieldsToPrune,true);
 
-      await mongoose.model('Device').findOne({deviceName:prunedDeviceObject.deviceName}).then(async(result) => {
-        if(result) {
+      const result = await mongoose.model('Device').findOne({deviceName:prunedDeviceObject.deviceName})
 
-          const existingDeviceObject:any = result._doc
+      if(result) {
 
-          //Utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, prunedDeviceObject.deviceName, `.. found existing device`)
-          let updateDeviceObject:any = {deviceName: existingDeviceObject.deviceName}
+        const existingDeviceObject:any = result._doc
 
-          const prunedDeviceObjectKeys = Object.keys(prunedDeviceObject);
-          const existingDeviceObjectKeys = Object.getOwnPropertyNames(existingDeviceObject);
+        //Utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, prunedDeviceObject.deviceName, `.. found existing device`)
+        let updateDeviceObject:any = {deviceName: existingDeviceObject.deviceName}
 
-          updateDeviceObject.operatingSystem = this.normalizeOperatingSystem(existingDeviceObject, prunedDeviceObject)
-          updateDeviceObject.deviceType = this.determineDeviceType(updateDeviceObject.operatingSystem, existingDeviceObject, prunedDeviceObject)
+        const prunedDeviceObjectKeys = Object.keys(prunedDeviceObject);
+        const existingDeviceObjectKeys = Object.getOwnPropertyNames(existingDeviceObject);
 
-          // for(let i=0; i<existingDeviceObjectKeys.length; i++) {
-          //   this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, prunedDeviceObject.deviceName, `.. found key: ${existingDeviceObjectKeys[i]}`)
-          // }
+        updateDeviceObject.operatingSystem = this.normalizeOperatingSystem(existingDeviceObject, prunedDeviceObject)
+        updateDeviceObject.deviceType = this.determineDeviceType(updateDeviceObject.operatingSystem, existingDeviceObject, prunedDeviceObject)
 
-          // iterate through the keys ..
-          for(let j=0;j<prunedDeviceObjectKeys.length;j++) {
+        // for(let i=0; i<existingDeviceObjectKeys.length; i++) {
+        //   this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, prunedDeviceObject.deviceName, `.. found key: ${existingDeviceObjectKeys[i]}`)
+        // }
 
-            const key = prunedDeviceObjectKeys[j]
+        // iterate through the keys ..
+        for(let j=0;j<prunedDeviceObjectKeys.length;j++) {
 
-            // does this key already exist for the retreived object?
-            if(existingDeviceObjectKeys.includes(key)) {
+          const key = prunedDeviceObjectKeys[j]
 
-              // if the key is different, we need add it to the update object
-              if(existingDeviceObject[key]!==prunedDeviceObject[key]) {
-                if(this._showDetails) {
-                  this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Change, `${prunedDeviceObject.deviceName}.${key}: ${existingDeviceObject[key]} -> ${prunedDeviceObject[key]}`)
-                }
-                updateDeviceObject[key] = prunedDeviceObject[key]
-              } else {
-                if(this._showDetails) {
-                  this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `${prunedDeviceObject.deviceName}.${key}: ${prunedDeviceObject[key]}`)
-                }
+          // does this key already exist for the retreived object?
+          if(existingDeviceObjectKeys.includes(key)) {
+
+            // if the key is different, we need add it to the update object
+            if(existingDeviceObject[key]!==prunedDeviceObject[key]) {
+              if(this._showDetails) {
+                this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Change, `${prunedDeviceObject.deviceName}.${key}: ${existingDeviceObject[key]} -> ${prunedDeviceObject[key]}`)
               }
+              updateDeviceObject[key] = prunedDeviceObject[key]
             } else {
-              // is the key value undefined?
-              if(prunedDeviceObject[key]!=undefined) {
-                // add the new key
-                updateDeviceObject[key] = prunedDeviceObject[key];
-                if(this._showDetails) {
-                  this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `${prunedDeviceObject.deviceName}.${key}: ${prunedDeviceObject[key]}`)
-                }
+              if(this._showDetails) {
+                this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Ok, `${prunedDeviceObject.deviceName}.${key}: ${prunedDeviceObject[key]}`)
+              }
+            }
+          } else {
+            // is the key value undefined?
+            if(prunedDeviceObject[key]!=undefined) {
+              // add the new key
+              updateDeviceObject[key] = prunedDeviceObject[key];
+              if(this._showDetails) {
+                this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `${prunedDeviceObject.deviceName}.${key}: ${prunedDeviceObject[key]}`)
               }
             }
           }
-
-          // do we have pending updates?
-          if(Object.keys(updateDeviceObject).length>0) {
-            if(this._showDetails) {
-              this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `${prunedDeviceObject.deviceName}.${Object.keys(updateDeviceObject).length} updates needed.`)
-            }
-
-            try {
-              await mongoose.model('Device').updateOne(
-                { deviceName: prunedDeviceObject.deviceName},
-                {
-                  $set: updateDeviceObject
-                },
-                {
-                  new: true,
-                  upsert: true,
-                }
-              )
-            } catch(err:any) {
-              this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${prunedDeviceObject.deviceName}: ${err.toString()}`)
-            }
-
-          }
-        } else {
-          isNewDevice = true;
-
-          //Utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `.. new device detected: ${prunedDeviceObject.deviceName}`)
-
-          prunedDeviceObject.deviceFirstObserved = new Date()
-          const emptyDeviceObject:any = {deviceName: prunedDeviceObject.deviceName}
-          prunedDeviceObject.operatingSystem = this.normalizeOperatingSystem(emptyDeviceObject, prunedDeviceObject)
-
-          await mongoose.model('Device').updateOne(
-            { deviceName: prunedDeviceObject.deviceName },
-            {
-              $set: prunedDeviceObject
-            },
-            {
-              new: true,
-              upsert: true
-            }
-          );
         }
-      },
-      (reason:any) => {
-        throw reason
-      }
-      )
 
-      return new Promise<boolean>((resolve) => {resolve(isNewDevice)})
+        // do we have pending updates?
+        if(Object.keys(updateDeviceObject).length>0) {
+          if(this._showDetails) {
+            this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Info, `${prunedDeviceObject.deviceName}.${Object.keys(updateDeviceObject).length} updates needed.`)
+          }
+
+          try {
+            await mongoose.model('Device').updateOne(
+              { deviceName: prunedDeviceObject.deviceName},
+              {
+                $set: updateDeviceObject
+              },
+              {
+                new: true,
+                upsert: true,
+              }
+            )
+          } catch(err:any) {
+            this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Error, `${prunedDeviceObject.deviceName}: ${err.toString()}`)
+          }
+
+        }
+      } else {
+        isNewDevice = true;
+
+        //Utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `.. new device detected: ${prunedDeviceObject.deviceName}`)
+
+        prunedDeviceObject.deviceFirstObserved = new Date()
+        const emptyDeviceObject:any = {deviceName: prunedDeviceObject.deviceName}
+        prunedDeviceObject.operatingSystem = this.normalizeOperatingSystem(emptyDeviceObject, prunedDeviceObject)
+
+        await mongoose.model('Device').updateOne(
+          { deviceName: prunedDeviceObject.deviceName },
+          {
+            $set: prunedDeviceObject
+          },
+          {
+            new: true,
+            upsert: true
+          }
+        );
+
+        this._utilities.AddLogEntry(Utilities.LogEntrySeverity.Add, `.. persisted new device: ${prunedDeviceObject.deviceName}`)
+
+      }
+
+      return new Promise<void>((resolve) => {resolve()})
 
     }
 
