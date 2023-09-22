@@ -67,60 +67,60 @@ export interface AzureActiveDirectoryDevice {
 export interface AzureManagedDevice {
 
   // mandatory
-  deviceName: string,
   observedByAzureMDM: boolean;
-
-  // strings
-  azureManagedDeviceName: string;
-  azureManagedManagedDeviceName: string;
+  deviceName: string,
   azureManagedId: string;
-  azureManagedUserId: string;
-  azureManagedManagedDeviceOwnerType: string;
-  azureManagedOperatingSystem: string;
-  azureManagedComplianceState: string;
-  azureManagedJailBroken: string;
-  azureManagedManagementAgent: string;
-  azureManagedOperatingSystemVersion: string;
-  azureManagedEASDeviceID: string;
-  azureManagedDeviceEnrollmentType: string;
-  azureManagedActivationLockBypassCode: string;
-  azureManagedEmailAddress: string;
-  azureManagedAzureADDeviceID: string;
-  azureManagedDeviceRegistrationState: string;
-  azureManagedDeviceCategoryDisplayName: string;
-  azureManagedExchangeAccessState: string;
-  azureManagedExchangeAccessStateReason: string;
-  azureManagedRemoteAssistanceSessionUrl: string;
-  azureManagedRemoteAssistanceErrorDetails: string;
-  azureManagedUserPrincipalName: string;
-  azureManagedModel: string;
-  azureManagedManufacturer: string;
-  azureManagedIMEI: string;
-  azureManagedSerialNumber: string;
-  azureManagedPhoneNumber: string;
-  azureManagedAndroidSecurityPatchLevel: string;
-  azureManagedUserDisplayName: string;
-  azureManagedConfigurationManagerClientEnabedFeatures: string;
-  azureManagedWiFiMACAddress: string;
-  azureManagedDeviceHealthAttestationState: string;
-  azureManagedSubscriberCarrier: string;
-  azureManagedMEID: string;
-  azureManagedTotalStorageSpaceInBytes: string;
-  azureManagedFreeStorageSpaceInBytes: string;
-  azureManagedPartnerReportedThreatState: string;
-  azureManagedRequireUserEnrollmentApproval: string;
-  azureManagedICCID: string;
-  azureManagedUDID: string;
-  azureManagedNotes: string;
-  azureManagedEthernetMacAddress: string;
-  azureManagedPhysicalMemoryInBytes: string;
+  
+  // strings
+  azureManagedDeviceName: string|undefined;
+  azureManagedManagedDeviceName: string|undefined;
+  azureManagedUserId: string|undefined;
+  azureManagedManagedDeviceOwnerType: string|undefined;
+  azureManagedOperatingSystem: string|undefined;
+  azureManagedComplianceState: string|undefined;
+  azureManagedJailBroken: string|undefined;
+  azureManagedManagementAgent: string|undefined;
+  azureManagedOperatingSystemVersion: string|undefined;
+  azureManagedEASDeviceID: string|undefined;
+  azureManagedDeviceEnrollmentType: string|undefined;
+  azureManagedActivationLockBypassCode: string|undefined;
+  azureManagedEmailAddress: string|undefined;
+  azureManagedAzureADDeviceID: string|undefined;
+  azureManagedDeviceRegistrationState: string|undefined;
+  azureManagedDeviceCategoryDisplayName: string|undefined;
+  azureManagedExchangeAccessState: string|undefined;
+  azureManagedExchangeAccessStateReason: string|undefined;
+  azureManagedRemoteAssistanceSessionUrl: string|undefined;
+  azureManagedRemoteAssistanceErrorDetails: string|undefined;
+  azureManagedUserPrincipalName: string|undefined;
+  azureManagedModel: string|undefined;
+  azureManagedManufacturer: string|undefined;
+  azureManagedIMEI: string|undefined;
+  azureManagedSerialNumber: string|undefined;
+  azureManagedPhoneNumber: string|undefined;
+  azureManagedAndroidSecurityPatchLevel: string|undefined;
+  azureManagedUserDisplayName: string|undefined;
+  azureManagedConfigurationManagerClientEnabedFeatures: string|undefined;
+  azureManagedWiFiMACAddress: string|undefined;
+  azureManagedDeviceHealthAttestationState: string|undefined;
+  azureManagedSubscriberCarrier: string|undefined;
+  azureManagedMEID: string|undefined;
+  azureManagedTotalStorageSpaceInBytes: string|undefined;
+  azureManagedFreeStorageSpaceInBytes: string|undefined;
+  azureManagedPartnerReportedThreatState: string|undefined;
+  azureManagedRequireUserEnrollmentApproval: string|undefined;
+  azureManagedICCID: string|undefined;
+  azureManagedUDID: string|undefined;
+  azureManagedNotes: string|undefined;
+  azureManagedEthernetMacAddress: string|undefined;
+  azureManagedPhysicalMemoryInBytes: string|undefined;
   // dates
-  azureManagedEnrolledDateTime: Date;
-  azureManagedLastSyncDateTime: Date;
-  azureManagedEASActivationDateTime: Date;
-  azureManagedExchangeLastSuccessfulSyncDateTime: Date;
-  azureManagedComplianceGracePeriodExpirationDateTime: Date;
-  azureManagedManagementCertificateExpirationDateTime: Date;
+  azureManagedEnrolledDateTime: Date|undefined;
+  azureManagedLastSyncDateTime: Date|undefined;
+  azureManagedEASActivationDateTime: Date|undefined;
+  azureManagedExchangeLastSuccessfulSyncDateTime: Date|undefined;
+  azureManagedComplianceGracePeriodExpirationDateTime: Date|undefined;
+  azureManagedManagementCertificateExpirationDateTime: Date|undefined;
   // azure managed - boolean
   azureManagedIsEASActivated: boolean;
   azureManagedIsAzureADRegistered: boolean;

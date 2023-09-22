@@ -4,8 +4,7 @@
     "axios": "^1.5.0",
     "ldapts": "^6.0.0",
     "mongoose": "^7.5.0",
-    "mssql": "^10.0.0",
-    "whiskey-utilities": "^1.0.27"
+    "mssql": "^10.0.0"
   },
   "version": "1.2.6",
   "name": "whiskey-telemetry",

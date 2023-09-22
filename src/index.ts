@@ -21,16 +21,16 @@ export class Telemetry {
         this._logFrequency=logFrequency
         this._showDetails=showDetails
         this._showDebug=showDebug
-        this._utilities = new Utilities(logStack, showDetails, showDebug);
+        this._le = new Utilities.LogEngine(logStack);
     }
     private _mongoURI:string=''
     private _logFrequency:number=1000
     private _showDetails:boolean=false
     private _showDebug:boolean=false
-    private _utilities:Utilities=new Utilities([])
+    private _le:Utilities.LogEngine = new Utilities.LogEngine([])
 
     public async persistToMicrosoftSql(MicrosoftSqlConfig:any, sqlRequestCollection:SqlRequestCollection):Promise<boolean> {
-        const mssql:MicrosoftSql=new MicrosoftSql(this._utilities.logStack, MicrosoftSqlConfig)
+        const mssql:MicrosoftSql=new MicrosoftSql(this._le, MicrosoftSqlConfig)
         await mssql.writeToSql(sqlRequestCollection, this._logFrequency)
         return new Promise<boolean>((resolve) => {resolve(true)})
     }
